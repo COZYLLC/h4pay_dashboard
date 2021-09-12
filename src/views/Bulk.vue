@@ -1,0 +1,207 @@
+<template>
+  <div id="bulkform" v-if="customer.teacherCheck">
+    <p class="title is-8" style="margin-bottom: 5vh">교내 매점 쿠폰 대량발주</p>
+    <b-steps v-model="activeStep" :has-navigation="false">
+      <b-step-item step="1" label="양식 다운로드" icon="file-download">
+        <p>
+          아래 엑셀 양식을 다운로드 받아 쿠폰을 받고자 하는 학생들의 정보를
+          입력해주세요.
+        </p>
+
+        <a :href="tempURL">
+          <b-button
+            @click="activeStep = 1"
+            variant="primary"
+            size="lg"
+            style="margin-bottom: 20px"
+            >양식 다운로드</b-button
+          ></a
+        >
+      </b-step-item>
+      <b-step-item step="2" label="정보 입력" icon="keyboard">
+        <p>
+          품목 정보를 입력해주시고, 파일 첨부란에 엑셀 파일을 첨부해주세요.
+          <br />
+          <span style="color: red"
+            >(전화번호는 엑셀과 주문자 정보 모두 '-' 없이 숫자만
+            입력해주세요.)</span
+          >
+        </p>
+        <b-field label="주문 품목">
+          <b-select
+            style="margin-bottom: 20px"
+            size="lg"
+            placeholder="제품을 선택해주세요."
+          >
+            <option
+              v-for="(product, idx) in prodList"
+              :key="idx"
+              :value="product.id"
+            >
+              {{ product.text }}
+            </option>
+          </b-select>
+        </b-field>
+        <b-field label="1인 당 수량">
+          <b-input
+            v-model="customer.qty"
+            type="number"
+            size="lg"
+            placeholder="1인 당 수량"
+            style="margin-bottom: 20px"
+          />
+        </b-field>
+        <b-field label="선물 메시지">
+          <b-input
+            v-model="customer.reason"
+            type="text"
+            size="lg"
+            style="margin-bottom: 20px"
+          />
+        </b-field>
+        <b-button
+          @click="goToUpload"
+          class="is-success"
+          size="lg"
+          style="float: right"
+          >다음</b-button
+        >
+      </b-step-item>
+      <b-step-item step="2" label="학생 명단 업로드" icon="upload">
+        <b-field label="엑셀 파일 업로드">
+          <b-upload v-model="customer.file" drag-drop>
+            <section class="section">
+              <div class="content has-text-centered">
+                <p>
+                  <b-icon icon="upload" size="is-large"> </b-icon>
+                </p>
+                <p>파일을 선택하거나 드래그해주세요</p>
+              </div>
+            </section>
+          </b-upload>
+        </b-field>
+        <b-button @click="submit" class="is-success" style="float: right"
+          >제출</b-button
+        >
+      </b-step-item>
+    </b-steps>
+  </div>
+</template>
+<script>
+export default {
+  created() {
+    /*     this.$store.dispatch("loginCheckA").then(
+      function () {
+        if (
+          this.$store.getters.getName == null ||
+          this.$store.getters.getRole == null
+        ) {
+          this.$router.push("/introPage");
+        } else {
+          this.customer.name = this.$store.getters.getName;
+          this.customer.role = this.$store.getters.getRole;
+          if (this.customer.role == "T") {
+            this.customer.teacherCheck = true;
+          }
+          this.$axios
+            .post(`${process.env.VUE_APP_API_URL}/users/phonenum`, {
+              uid: this.$store.getters.getUid,
+            })
+            .then((res) => {
+              this.customer.tel = res.data.tel;
+            });
+        }
+      }.bind(this)
+    ); */
+    this.$axios
+      .get(`${process.env.VUE_APP_API_URL}/product`)
+      .then((res) => {
+        if (res != undefined) {
+          res.data.list.forEach((item) => {
+            this.prodList.push({
+              value: item.id,
+              text: item.productName,
+            });
+          });
+        }
+        console.log(this.prodList);
+      })
+      .catch((error) => {
+        this.$Sentry.captureException(error);
+        alert("제품 목록을 불러오지 못했습니다. 개발자에게 문의해주세요. (1)");
+      });
+  },
+  data() {
+    return {
+      activeStep: 0,
+      customer: {
+        name: "",
+        tel: "",
+        role: "",
+        teacherCheck: true,
+        file: [],
+        product: null,
+        reason: "",
+      },
+      form: FormData,
+      prodList: [],
+      code: "",
+
+      tempURL: process.env.VUE_APP_API_URL + "/../excelTemplate.xlsx",
+    };
+  },
+  methods: {
+    goToUpload() {
+      const customer = this.customer;
+      if (customer.reason == "") {
+        alert("정보를 모두 입력해주세요!");
+      } else if (customer.qty <= 0) {
+        alert("수량을 올바르게 입력해주세요! ");
+      } else {
+        let form = new FormData();
+        form.append("name", this.name);
+        form.append("tel", this.tel);
+        form.append("product", customer.product);
+        form.append("reason", customer.reason);
+        form.append("qty", customer.qty);
+        this.activeStep = 2;
+        this.form = form;
+      }
+    },
+    submit() {
+      console.log(this.form);
+      console.log(this.customer.file);
+      if (this.customer.file == "") {
+        alert("파일을 업로드해주세요!");
+      } else {
+        this.form.append("excel", this.customer.file);
+        this.$axios
+          .post(`${process.env.VUE_APP_API_URL}/upload/bulk`, this.form, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((res) => {
+            console.log(res);
+            if (res.data.status == true) {
+              alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((error) => {
+            this.$Sentry.captureException(error);
+            alert(error.status);
+          });
+      }
+    },
+  },
+};
+</script>
+<style>
+#bulk {
+  padding: 30px;
+  text-align: left;
+  margin-bottom: 100px;
+}
+</style>

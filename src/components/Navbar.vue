@@ -5,10 +5,11 @@
     :expand-on-hover="expandOnHover"
     :reduce="reduce"
     :delay="expandWithDelay ? 500 : null"
+    :fullheight="true"
     type="is-light"
     open
   >
-    <div class="p-1">
+    <div class="p-4">
       <div class="block">
         <img
           style="padding: 10%"
@@ -19,11 +20,7 @@
       <b-menu class="is-custom-mobile">
         <b-menu-list label="메인">
           <!-- 자식이 없을 경우 -->
-          <b-menu-item
-            icon="home"
-            label="홈"
-            @click="$router.push('/')"
-          >
+          <b-menu-item icon="home" label="홈" @click="$router.push('/')">
           </b-menu-item>
         </b-menu-list>
         <b-menu-list label="관리">

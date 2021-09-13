@@ -85,15 +85,19 @@ export default {
           };
         }
       }
-      console.log(data)
+      console.log(data);
       this.$axios
         .post(`${process.env.VUE_APP_API_URL}/orders/filter`, data)
         .then((orderRes) => {
-          console.log(orderRes)
+          console.log(orderRes);
           if (orderRes.data.status) {
             this.data = orderRes.data.result;
             this.loaded = true;
           }
+          this.$buefy.notification.open({
+            message: "조회에 성공했습니다!",
+            type: "is-success",
+          });
         });
     },
   },

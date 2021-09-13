@@ -1,7 +1,7 @@
 <template>
   <div id="home">
     <div class="tile is-ancestor">
-      <div class="tile is-vertical is-8">
+      <div class="tile is-vertical is-6">
         <div class="tile">
           <div class="tile is-parent is-vertical">
             <article class="tile is-child notification">
@@ -21,7 +21,7 @@
               <p class="subtitle">{{ weekly.manySoldProduct }}</p>
             </article>
           </div>
-          <div class="tile is-parent">
+<!--           <div class="tile is-parent">
             <article class="tile is-child notification is-info">
               <p class="title">Middle tile</p>
               <p class="subtitle">With an image</p>
@@ -29,9 +29,8 @@
                 <img src="https://bulma.io/images/placeholders/640x480.png" />
               </figure>
             </article>
-          </div>
+          </div> -->
         </div>
-        <div class="tile is-parent"></div>
       </div>
       <div class="tile is-parent">
         <article class="tile is-child notification is-success">

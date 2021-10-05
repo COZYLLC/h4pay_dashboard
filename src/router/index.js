@@ -6,6 +6,10 @@ import Gift from '@/views/Gift'
 import Bulk from '@/views/Bulk'
 import Event from '@/views/Event'
 import Product from '@/views/Product'
+import Login from "@/views/Login"
+import Register from "@/views/Register"
+import BulkReq from '@/views/BulkReq'
+import Success from '@/views/Success'
 
 Vue.use(VueRouter);
 
@@ -40,6 +44,35 @@ const routes = [
     name: "Product",
     component: Product,
   },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+    meta: {
+      hideNavigation: true
+    }
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: Register,
+    meta: {
+      hideNavigation: true
+    }
+  },
+  {
+    path: "/gift/bulk/lookup",
+    name: "BulkReq",
+    component: BulkReq,
+  },
+  {
+    path: "/success",
+    name: "Success",
+    component: Success,
+    meta: {
+      hideNavigation: true
+    }
+  }
 ];
 
 const router = new VueRouter({

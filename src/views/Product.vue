@@ -5,22 +5,27 @@
       이벤트 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
     </p>
     <Table
+      v-if="loaded"
       type="product"
       :products="products"
       :columns="columns"
       :data="products"
       :detailKey="table.detailKey"
+      :checkable="true"
     />
+    <table-loading v-else />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import Table from "@/components/Table";
+import TableLoading from "@/components/TableLoading.vue";
 export default {
   name: "Home",
   components: {
     Table,
+    TableLoading,
   },
   created() {
     this.$axios
@@ -28,19 +33,13 @@ export default {
       .then((productRes) => {
         if (productRes.data.status) {
           this.products = productRes.data.list;
-          this.$axios
-            .get(`${process.env.VUE_APP_API_URL}/event/`)
-            .then((eventRes) => {
-              console.log(eventRes);
-              if (eventRes.data.event != null) {
-                this.data = eventRes.data.event;
-              }
-            });
+          this.loaded = true;
         }
       });
   },
   data() {
     return {
+      loaded: false,
       data: [],
       products: [],
       table: {
@@ -72,3 +71,9 @@ export default {
   },
 };
 </script>
+
+<style>
+.cropper {
+  background: #ddd;
+}
+</style>

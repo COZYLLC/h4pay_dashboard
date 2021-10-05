@@ -1,45 +1,37 @@
 <template>
   <div id="home">
     <div class="tile is-ancestor">
-      <div class="tile is-vertical is-6">
-        <div class="tile">
-          <div class="tile is-parent is-vertical">
-            <article class="tile is-child notification">
-              <p class="title">최근 일주일 주문량</p>
-              <chart
-                v-if="loaded"
-                :labels="weekly.labels"
-                :datasets="weekly.datasets"
-              />
-            </article>
-            <article class="tile is-child notification is-warning">
-              <p class="title">오늘 주문량</p>
-              <p class="subtitle">{{ today.orders }}</p>
-            </article>
-            <article class="tile is-child notification is-danger">
-              <p class="title">가장 많이 팔린 상품</p>
-              <p class="subtitle">{{ weekly.manySoldProduct }}</p>
-            </article>
-          </div>
-<!--           <div class="tile is-parent">
-            <article class="tile is-child notification is-info">
-              <p class="title">Middle tile</p>
-              <p class="subtitle">With an image</p>
-              <figure class="image is-4by3">
-                <img src="https://bulma.io/images/placeholders/640x480.png" />
-              </figure>
-            </article>
-          </div> -->
+      <div class="tile">
+        <div class="tile is-parent is-vertical is-6">
+          <article class="tile is-child notification">
+            <p class="title">최근 일주일 주문량</p>
+            <chart
+              v-if="loaded"
+              :labels="weekly.labels"
+              :datasets="weekly.ordersData"
+              style="width: 25vh"
+            />
+          </article>
+          <article class="tile is-child notification is-primary">
+            <p class="title">오늘 주문량</p>
+            <p class="subtitle is-2">{{ today.orders }}</p>
+          </article>
         </div>
-      </div>
-      <div class="tile is-parent">
-        <article class="tile is-child notification is-success">
-          <div class="content">
-            <p class="title">Tall tile</p>
-            <p class="subtitle">With even more content</p>
-            <div class="content"></div>
-          </div>
-        </article>
+        <div class="tile is-parent is-vertical is-6">
+          <article class="tile is-child notification">
+            <p class="title">주간 판매금액</p>
+            <chart
+              v-if="loaded"
+              :labels="weekly.labels"
+              :datasets="weekly.priceData"
+              style="width: 25vh"
+            />
+          </article>
+          <article class="tile is-child notification is-primary">
+            <p class="title">가장 많이 팔린 상품</p>
+            <p class="subtitle">{{ weekly.manySoldProduct }}</p>
+          </article>
+        </div>
       </div>
     </div>
   </div>
@@ -55,24 +47,24 @@ export default {
       .then((productRes) => {
         if (productRes.data.status) {
           this.products = productRes.data.list;
-        }
-      });
-    let today = new Date();
-    const end = new Date();
-    today.setDate(today.getDate() - 7);
-    const start = today;
-    this.$axios
-      .post(`${process.env.VUE_APP_API_URL}/orders/filter`, {
-        type: "date",
-        start: start,
-        end: end,
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const orders = res.data.result;
-          this.setTableData(orders, start);
-          this.today.orders = this.getTodayOrders(orders, end);
-          this.getManySoldProduct(orders);
+          let start = new Date();
+          const end = new Date();
+          console.log(end);
+          start.setDate(start.getDate() - 6);
+          this.$axios
+            .post(`${process.env.VUE_APP_API_URL}/orders/filter`, {
+              type: "date",
+              start: start,
+              end: end,
+            })
+            .then((res) => {
+              if (res.data.status) {
+                const orders = res.data.result;
+                this.setTableData(orders, start);
+                this.today.orders = this.getTodayOrders(orders, end);
+                this.getManySoldProduct(orders);
+              }
+            });
         }
       });
   },
@@ -81,9 +73,15 @@ export default {
       for (let i = 0; i < orders.length; i++) {
         const date = new Date(orders[i].date);
         this.$set(
-          this.weekly.datasets[0].data,
+          this.weekly.ordersData[0].data,
           date.getDate() - start.getDate(),
-          this.weekly.datasets[0].data[date.getDate() - start.getDate()] + 1
+          this.weekly.ordersData[0].data[date.getDate() - start.getDate()] + 1
+        );
+        this.$set(
+          this.weekly.priceData[0].data,
+          date.getDate() - start.getDate(),
+          this.weekly.priceData[0].data[date.getDate() - start.getDate()] +
+            orders[i].amount
         );
       }
       for (let i = 0; i < 7; i++) {
@@ -99,7 +97,7 @@ export default {
     getManySoldProduct(orders) {
       let qty = [];
       orders.forEach((order) => {
-        order.item.forEach((item) => {
+        this.jsonToList(order.item).forEach((item) => {
           if (item.qty > 0) {
             if (qty[item.id] != null) {
               qty[item.id] += item.qty;
@@ -118,6 +116,13 @@ export default {
       });
       this.weekly.manySoldProduct = this.products[max[0]].productName;
     },
+    jsonToList(json) {
+      let resultArray = [];
+      for (let i = 0; i < json.length; i++) {
+        resultArray.push(json);
+      }
+      return resultArray;
+    },
   },
   data() {
     return {
@@ -128,10 +133,17 @@ export default {
       },
       weekly: {
         labels: ["", "", "", "", "", "", ""],
-        datasets: [
+        ordersData: [
           {
             label: "주간 주문량",
             backgroundColor: "#f87979",
+            data: [0, 0, 0, 0, 0, 0, 0],
+          },
+        ],
+        priceData: [
+          {
+            label: "주간 판매금액",
+            backgroundColor: "#30c8ff",
             data: [0, 0, 0, 0, 0, 0, 0],
           },
         ],

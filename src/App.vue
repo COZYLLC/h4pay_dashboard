@@ -1,15 +1,32 @@
 <template>
   <div class="app">
     <section class="sidebar-layout">
-      <Navbar />
+      <Navbar v-if="!$route.meta.hideNavigation" />
 
       <div class="p-1" id="routerView">
-        <router-view />
+        <transition name="fade"> <router-view /> </transition>
       </div>
     </section>
   </div>
 </template>
 
+<script>
+export default {
+  created() {
+    this.$store.dispatch("loginCheckA").then(() => {
+      if (
+        this.$store.getters.getName == null ||
+        this.$store.getters.getRole == null
+      ) {
+        this.$router.push("/login");
+      } else {
+        this.user.name = this.$store.getters.getName;
+        this.user.role = this.$store.getters.getRole;
+      }
+    });
+  },
+};
+</script>
 
 <style>
 .app .sidebar-layout {
@@ -26,6 +43,7 @@
   padding: 20px !important;
 }
 </style>
+
 
 <script>
 import Navbar from "@/components/Navbar";

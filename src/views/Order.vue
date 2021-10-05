@@ -30,17 +30,21 @@
       :columns="columns"
       :data="data"
       :detailKey="table.detailKey"
+      :checkable="true"
     />
+    <table-loading v-else-if="loaded == false" />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import Table from "@/components/Table";
+import TableLoading from "../components/TableLoading.vue";
 export default {
   name: "Home",
   components: {
     Table,
+    TableLoading,
   },
   created() {
     this.$axios
@@ -48,10 +52,19 @@ export default {
       .then((productRes) => {
         if (productRes.data.status) {
           this.products = productRes.data.list;
+          if (this.$route.query.orderId != null) {
+            this.findOrder();
+          }
         }
       });
   },
   methods: {
+    setCheckedRows(value) {
+      this.checkedRows = value;
+    },
+    setPage(value) {
+      this.page = value;
+    },
     findOrder() {
       let data = {};
       if (this.selectedStart != null && this.selectedEnd != null) {
@@ -91,13 +104,14 @@ export default {
         .then((orderRes) => {
           console.log(orderRes);
           if (orderRes.data.status) {
-            this.data = orderRes.data.result;
+            this.data = orderRes.data.result.reverse();
             this.loaded = true;
+            this.$buefy.notification.open({
+              message: "조회에 성공했습니다!",
+              type: "is-primary",
+              duration: 1000,
+            });
           }
-          this.$buefy.notification.open({
-            message: "조회에 성공했습니다!",
-            type: "is-success",
-          });
         });
     },
   },
@@ -114,16 +128,19 @@ export default {
       selectedStart: null,
       selectedEnd: null,
       id: "",
-      loaded: false,
+      loaded: null,
       data: [],
       products: [],
       table: {
-        detailKey: "orderid",
+        detailKey: "orderId",
+        page: 1,
+        checkedRows: [],
       },
       columns: [
         {
-          field: "orderid",
+          field: "orderId",
           label: "주문번호",
+          width: 1,
         },
         {
           field: "uid",

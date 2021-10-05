@@ -5,17 +5,22 @@
       ref="table"
       paginated
       per-page="10"
-      :opened-detailed="defaultOpenedDetails"
       detailed
       :detail-key="detailKey"
       detail-transition="fade"
       show-detail-icon
-      checkable
+      :checkable="checkable"
       checkbox-position="left"
       :checked-rows.sync="checkedRows"
+      :header-checkable="false"
+      @page-change="onPageChange"
+      :current-page.sync="page"
       :is-row-checkable="
         (row) =>
-          checkedRows.length == 0 || row.soldout == checkedRows[0].soldout
+          checkedRows.length == 0 ||
+          (type == 'order' || type == 'gift'
+            ? row.orderId == checkedRows[0].orderId
+            : row.id == checkedRows[0].id)
       "
       aria-next-label="Next page"
       aria-previous-label="Previous page"
@@ -27,6 +32,7 @@
         :key="idx"
         :field="column.field"
         :label="column.label"
+        :width="column.field == 'orderId' ? 10 : null"
         centered
         v-slot="props"
       >
@@ -40,13 +46,24 @@
         >
           {{ new Date(props.row[column.field]).toLocaleDateString() }}
         </template>
+        <template v-else-if="column.field == 'product'">
+          {{
+            products.filter(
+              (product) => product.id == props.row[column.field]
+            )[0].productName
+          }}
+        </template>
         <template
-          v-else-if="column.field == 'exchanged' || column.field == 'soldout'"
+          v-else-if="
+            column.field == 'exchanged' ||
+            column.field == 'soldout' ||
+            column.field == 'approved'
+          "
         >
           <span v-if="props.row[column.field] == true" class="tag is-danger">
             O
           </span>
-          <span v-else class="tag is-success"> X </span>
+          <span v-else class="tag is-primary"> X </span>
         </template>
         <template v-else>{{ props.row[column.field] }}</template>
       </b-table-column>
@@ -54,65 +71,93 @@
       <template #detail="props">
         <article class="media">
           <div class="columns">
-            <OrderDetail
+            <PurchaseDetail
               v-if="type == 'order' || type == 'gift'"
-              :items="props.row.item"
+              :item="props.row.item"
               :products="products"
             />
             <EventDetail v-if="type == 'event'" :users="props.row.uid" />
             <ProductDetail v-if="type == 'product'" :product="props.row" />
+            <BulkReqDetail
+              v-if="type == 'bulkreq'"
+              :names="props.row.names"
+              :targets="props.row.targets"
+            />
           </div>
         </article>
       </template>
       <template #footer>
-        <div class="has-text-right" v-if="type == 'order' || type == 'gift'">
-          <b-button class="is-danger" style="margin-right: 7px"
-            >주문 취소</b-button
-          >
-          <b-button class="is-success" style="margin-right: 7px">교환</b-button>
-          <b-button class="is-info">정산</b-button>
-        </div>
-        <div class="has-text-right" v-else-if="type == 'product'">
-          <b-button class="is-info" style="margin-right: 7px"
-            >제품 정보 변경</b-button
-          >
-          <b-button
-            v-if="checkedRows.length != 0 && checkedRows[0].soldout"
-            class="is-danger"
-            style="margin-right: 7px"
-            >품절 처리</b-button
-          >
-          <b-button
-            v-else-if="checkedRows.length != 0"
-            class="is-success"
-            style="margin-right: 7px"
-            >재고보유 처리</b-button
-          >
-
-          <b-button class="is-danger" style="margin-right: 7px">제거</b-button>
-          <b-button class="is-success">추가</b-button>
-        </div>
+        <EventControl v-if="type == 'event'" :checkedRows="checkedRows" />
+        <PurchaseControl
+          v-else-if="type == 'order' || type == 'gift'"
+          :type="type"
+          :checkedRows="checkedRows"
+        />
+        <ProductControl
+          v-else-if="type == 'product'"
+          :checkedRows="checkedRows"
+        />
+        <BulkReqControl
+          v-else-if="type == 'bulkreq'"
+          :checkedRows="checkedRows"
+        />
       </template>
     </b-table>
   </section>
 </template>
 
 <script>
-import OrderDetail from "@/components/OrderDetail";
-import EventDetail from "@/components/EventDetail";
-import ProductDetail from "@/components/ProductDetail";
+import PurchaseDetail from "@/components/Purchase/Detail";
+import PurchaseControl from "@/components/Purchase/Control";
+import EventDetail from "@/components/Event/Detail";
+import EventControl from "@/components/Event/Control";
+import ProductDetail from "@/components/Product/Detail";
+import ProductControl from "@/components/Product/Control";
+import BulkReqDetail from "@/components/BulkReq/Detail";
+import BulkReqControl from "@/components/BulkReq/Control";
+
 export default {
   components: {
-    OrderDetail,
+    PurchaseDetail,
+    PurchaseControl,
     EventDetail,
+    EventControl,
     ProductDetail,
+    ProductControl,
+    BulkReqDetail,
+    BulkReqControl,
   },
-  props: ["type", "detailKey", "products", "columns", "data"],
+  methods: {
+    onPageChange(page) {
+      this.$router.replace({ query: { page: page } });
+    },
+  },
+  created() {
+    if (this.$route.query.page == undefined) {
+      if (this.$route.query.orderId == undefined) {
+        this.$router.replace({ query: { page: 1 } });
+      } else {
+        let idx = this.data.findIndex(
+          (element) => element.orderId == this.$route.query.orderId
+        );
+        this.checkedRows[0] = this.data[idx];
+        this.page = Math.ceil(idx / 10);
+        if (this.page == 0) {
+          this.page++;
+        }
+        console.log(this.page);
+      }
+    } else {
+      this.page = parseInt(this.$route.query.page);
+    }
+  },
+  props: ["type", "detailKey", "products", "columns", "data", "checkable"],
+
   data() {
     return {
-      checkedRows: [],
-      defaultOpenedDetails: [1],
       showDetailIcon: true,
+      checkedRows: [],
+      page: 1,
     };
   },
 };

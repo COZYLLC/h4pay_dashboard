@@ -1,27 +1,7 @@
 <template>
   <div class="home">
     <p class="title is-8">이벤트 내역 조회</p>
-    <p class="subtitle is-8">
-      이벤트 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
-    </p>
-    <b-field label="이벤트 날짜 범위 선택">
-      <b-datepicker ref="datepicker_start" expanded placeholder="시작" />
-      <b-button
-        @click="$refs.datepicker_start.toggle()"
-        icon-left="calendar"
-        type="is-primary"
-      />
-      <div style="width: 4%" />
-      <b-datepicker ref="datepicker_end" expanded placeholder="끝" />
-      <b-button
-        @click="$refs.datepicker_end.toggle()"
-        icon-left="calendar"
-        type="is-primary"
-      />
-    </b-field>
-    <b-button @click="$refs.datepicker_end.toggle()" type="is-primary"
-      >조회</b-button
-    >
+    <p class="subtitle is-8">이벤트 내역을 조회할 수 있습니다.</p>
     <Table
       v-if="loaded"
       type="event"
@@ -29,6 +9,8 @@
       :columns="columns"
       :data="data"
       :detailKey="table.detailKey"
+      :checkable="false"
+      :page="table.page"
     />
   </div>
 </template>
@@ -47,17 +29,34 @@ export default {
       .then((productRes) => {
         if (productRes.data.status) {
           this.products = productRes.data.list;
-          this.$axios
-            .get(`${process.env.VUE_APP_API_URL}/event/`)
-            .then((eventRes) => {
-              console.log(eventRes);
-              if (eventRes.data.result != null) {
-                this.data = eventRes.data.result;
-                this.loaded = true
-              }
-            });
+          this.lookup();
         }
       });
+    if (this.$route.query.page == undefined) {
+      if (this.$route.query.orderId) {
+        this.$router.replace({ query: { page: 1 } });
+      }
+    } else {
+      this.page = parseInt(this.$route.query.page);
+    }
+    let idx = this.data.findIndex(
+      (element) => element.orderId == "1202109261632631132259000"
+    );
+    this.checkedRows[0] = this.data[idx];
+    this.page = Math.ceil(idx / 10);
+  },
+  methods: {
+    lookup() {
+      this.$axios
+        .get(`${process.env.VUE_APP_API_URL}/event/`)
+        .then((eventRes) => {
+          console.log(eventRes);
+          if (eventRes.data.result != null) {
+            this.data = eventRes.data.result;
+            this.loaded = true;
+          }
+        });
+    },
   },
   data() {
     return {
@@ -66,6 +65,7 @@ export default {
       products: [],
       table: {
         detailKey: "id",
+        page: 1,
       },
       columns: [
         {
@@ -77,7 +77,7 @@ export default {
           label: "이벤트명",
         },
         {
-          field: "price",
+          field: "amount",
           label: "할인금액",
         },
         {

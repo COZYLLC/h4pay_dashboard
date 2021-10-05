@@ -17,6 +17,13 @@
             >양식 다운로드</b-button
           ></a
         >
+        <b-button
+          @click="activeStep = 1"
+          variant="primary"
+          size="lg"
+          style="margin-bottom: 20px; margin-left: 20px"
+          >이미 양식이 있어요.</b-button
+        >
       </b-step-item>
       <b-step-item step="2" label="정보 입력" icon="keyboard">
         <p>
@@ -29,6 +36,7 @@
         </p>
         <b-field label="주문 품목">
           <b-select
+            v-model="product"
             style="margin-bottom: 20px"
             size="lg"
             placeholder="제품을 선택해주세요."
@@ -36,7 +44,7 @@
             <option
               v-for="(product, idx) in prodList"
               :key="idx"
-              :value="product.id"
+              :value="product"
             >
               {{ product.text }}
             </option>
@@ -49,6 +57,7 @@
             size="lg"
             placeholder="1인 당 수량"
             style="margin-bottom: 20px"
+            maxlength="3"
           />
         </b-field>
         <b-field label="선물 메시지">
@@ -61,7 +70,7 @@
         </b-field>
         <b-button
           @click="goToUpload"
-          class="is-success"
+          class="is-primary"
           size="lg"
           style="float: right"
           >다음</b-button
@@ -69,18 +78,23 @@
       </b-step-item>
       <b-step-item step="2" label="학생 명단 업로드" icon="upload">
         <b-field label="엑셀 파일 업로드">
-          <b-upload v-model="customer.file" drag-drop>
+          <b-upload v-model="file" drag-drop>
             <section class="section">
               <div class="content has-text-centered">
                 <p>
                   <b-icon icon="upload" size="is-large"> </b-icon>
                 </p>
-                <p>파일을 선택하거나 드래그해주세요</p>
+                <p v-if="typeof file == 'function'">
+                  파일을 선택하거나 드래그하세요
+                </p>
+                <div v-else>
+                  {{ file.name }}
+                </div>
               </div>
             </section>
           </b-upload>
         </b-field>
-        <b-button @click="submit" class="is-success" style="float: right"
+        <b-button @click="submit" class="is-primary" style="float: right"
           >제출</b-button
         >
       </b-step-item>
@@ -90,29 +104,23 @@
 <script>
 export default {
   created() {
-    /*     this.$store.dispatch("loginCheckA").then(
+    this.$store.dispatch("loginCheckA").then(
       function () {
         if (
           this.$store.getters.getName == null ||
           this.$store.getters.getRole == null
         ) {
-          this.$router.push("/introPage");
+          this.$router.push("/login");
         } else {
           this.customer.name = this.$store.getters.getName;
           this.customer.role = this.$store.getters.getRole;
-          if (this.customer.role == "T") {
+          this.customer.uid = this.$store.getters.getUid;
+          if (this.customer.role == "T" || this.customer.role == "A") {
             this.customer.teacherCheck = true;
           }
-          this.$axios
-            .post(`${process.env.VUE_APP_API_URL}/users/phonenum`, {
-              uid: this.$store.getters.getUid,
-            })
-            .then((res) => {
-              this.customer.tel = res.data.tel;
-            });
         }
       }.bind(this)
-    ); */
+    );
     this.$axios
       .get(`${process.env.VUE_APP_API_URL}/product`)
       .then((res) => {
@@ -135,18 +143,16 @@ export default {
     return {
       activeStep: 0,
       customer: {
+        uid: "",
         name: "",
-        tel: "",
         role: "",
         teacherCheck: true,
-        file: [],
-        product: null,
         reason: "",
       },
+      file: File,
+      product: null,
       form: FormData,
       prodList: [],
-      code: "",
-
       tempURL: process.env.VUE_APP_API_URL + "/../excelTemplate.xlsx",
     };
   },
@@ -155,13 +161,17 @@ export default {
       const customer = this.customer;
       if (customer.reason == "") {
         alert("정보를 모두 입력해주세요!");
+      } else if (this.product == null) {
+        alert("품목을 선택해주세요!");
       } else if (customer.qty <= 0) {
         alert("수량을 올바르게 입력해주세요! ");
+      } else if (customer.qty > 100) {
+        alert("1인당 선물 개수는 100개 이하입니다!");
       } else {
         let form = new FormData();
-        form.append("name", this.name);
-        form.append("tel", this.tel);
-        form.append("product", customer.product);
+        form.append("senderUid", customer.uid);
+        form.append("senderName", customer.name);
+        form.append("product", this.product.value);
         form.append("reason", customer.reason);
         form.append("qty", customer.qty);
         this.activeStep = 2;
@@ -170,13 +180,13 @@ export default {
     },
     submit() {
       console.log(this.form);
-      console.log(this.customer.file);
-      if (this.customer.file == "") {
+      console.log(this.file);
+      if (typeof this.file == "function") {
         alert("파일을 업로드해주세요!");
       } else {
-        this.form.append("excel", this.customer.file);
+        this.form.append("excel", this.file);
         this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/upload/bulk`, this.form, {
+          .post(`${process.env.VUE_APP_API_URL}/bulk/request`, this.form, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -203,5 +213,11 @@ export default {
   padding: 30px;
   text-align: left;
   margin-bottom: 100px;
+}
+.upload {
+  width: 100% !important;
+}
+.upload-draggable {
+  width: 100% !important;
 }
 </style>

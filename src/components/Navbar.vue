@@ -1,11 +1,10 @@
 <template>
   <b-sidebar
     position="static"
-    mobile="hide"
-    :expand-on-hover="expandOnHover"
-    :reduce="reduce"
-    :delay="expandWithDelay ? 500 : null"
-    :fullheight="true"
+    mobile="reduce"
+    expand-on-hover="false"
+    delay="500"
+    fullheight
     type="is-light"
     open
   >
@@ -20,31 +19,40 @@
       <b-menu class="is-custom-mobile">
         <b-menu-list label="메인">
           <!-- 자식이 없을 경우 -->
-          <b-menu-item icon="home" label="홈" @click="$router.push('/')">
+          <b-menu-item
+            class="menu-item"
+            icon="home"
+            label="홈"
+            @click="$router.push('/')"
+          >
           </b-menu-item>
         </b-menu-list>
         <b-menu-list label="관리">
-          <div v-for="(item, i) in menu" :key="i">
+          <span v-for="(item, i) in menu" :key="i">
             <!-- 자식이 있을 경우 -->
             <b-menu-item
-              v-if="item.children != null"
+              class="menu-item"
+              v-if="item.children != null && validUsableMenu(item.children)"
               :active="item.active"
               :expanded="item.expanded"
               :icon="item.icon"
               :label="item.title"
             >
-              <b-menu-item
-                v-for="(child, j) in item.children"
-                :key="j"
-                :icon="child.icon"
-                :label="child.title"
-                @click="pushTo(item.route, child.route)"
-              ></b-menu-item>
+              <span v-for="(child, j) in item.children" :key="j">
+                <b-menu-item
+                  class="menu-item"
+                  v-if="validUsableMenuChild(child.role)"
+                  :icon="child.icon"
+                  :label="child.title"
+                  @click="pushTo(item.route, child.route)"
+                ></b-menu-item>
+              </span>
             </b-menu-item>
 
             <!-- 자식이 없을 경우 -->
             <b-menu-item
-              v-if="item.children == null"
+              class="menu-item"
+              v-if="item.children == null && validUsableMenuChild(item.role)"
               :active="item.active"
               :expanded="item.expanded"
               :icon="item.icon"
@@ -52,7 +60,7 @@
               @click="pushTo(item.route, '')"
             >
             </b-menu-item>
-          </div>
+          </span>
         </b-menu-list>
       </b-menu>
     </div>
@@ -65,6 +73,33 @@ export default {
     pushTo(parentRoute, childRoute) {
       this.$router.push(`${parentRoute}/${childRoute}`);
     },
+    validUsableMenuChild(role) {
+      return role.filter((role) => role == this.user.role).length > 0;
+    },
+    validUsableMenu(children) {
+      let usable = false;
+      children.forEach((child) => {
+        if (this.validUsableMenuChild(child.role)) {
+          console.log("있음");
+          usable = true;
+          return true;
+        }
+      });
+      return usable;
+    },
+  },
+  created() {
+    this.$store.dispatch("loginCheckA").then(() => {
+      if (
+        this.$store.getters.getName == null ||
+        this.$store.getters.getRole == null
+      ) {
+        this.$router.push("/login");
+      } else {
+        this.user.name = this.$store.getters.getName;
+        this.user.role = this.$store.getters.getRole;
+      }
+    });
   },
   data() {
     return {
@@ -72,6 +107,11 @@ export default {
       expandWithDelay: false,
       mobile: "reduce",
       reduce: false,
+      user: {
+        role: null,
+        uid: null,
+        name: null,
+      },
       menu: [
         {
           title: "이벤트",
@@ -79,6 +119,7 @@ export default {
           route: "/event",
           active: false,
           expanded: false,
+          role: ["SA", "AT"],
         },
         {
           title: "주문",
@@ -86,6 +127,7 @@ export default {
           route: "/order",
           active: false,
           expanded: false,
+          role: ["SA", "AT"],
         },
         {
           title: "선물",
@@ -94,40 +136,60 @@ export default {
           active: false,
           expanded: false,
           children: [
-            { title: "대량발주", icon: "paper-plane", route: "bulk" },
-            { title: "조회", icon: "search", route: "" },
+            { title: "조회", icon: "search", route: "", role: ["SA", "AT"] },
+            {
+              title: "대량선물",
+              icon: "paper-plane",
+              route: "bulk",
+              role: ["SA", "A", "T", "AT"],
+            },
+            {
+              title: "대량선물 조회 및 승인",
+              icon: "scroll",
+              route: "bulk/lookup",
+              role: ["SA", "A", "T", "AT"],
+            },
           ],
         },
         {
           title: "제품",
           icon: "boxes",
-          route: "/product",
+          route: "/product?page=1",
           active: false,
           expanded: false,
+          role: ["SA", "S", "AT"],
         },
-        {
+        /*         {
           title: "사용자 관리",
           icon: "users",
           route: "/users",
           active: false,
           expanded: false,
-        },
-        {
+          role: ["SA"],
+        }, */
+        /*        {
           title: "내 계정",
           icon: "user",
           route: "/account",
           active: false,
           expanded: false,
-        },
+          role: ["SA", "S", "T"],
+        }, */
         {
           title: "로그아웃",
           icon: "sign-out-alt",
-          route: "/signout",
+          route: "/login",
           active: false,
           expanded: false,
+          role: ["SA", "S", "T", "AT", ],
         },
       ],
     };
   },
 };
 </script>
+<style>
+.menu-item {
+  white-space: nowrap !important;
+}
+</style>

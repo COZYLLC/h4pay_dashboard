@@ -37,10 +37,11 @@
         </b-field>
         <b-field label="사진 업로드">
           <b-upload
-            v-if="currentImage == null"
-            v-model="currentImage"
+            v-if="selectedFile == null"
+            v-model="selectedFile"
             drag-drop
             accept="image/jpeg, image/png, image/gif"
+            @input="setImage"
           >
             <section class="section">
               <div class="content has-text-centered">
@@ -52,20 +53,22 @@
             </section>
           </b-upload>
         </b-field>
-        <div>
-          <img
-            ref="image"
-            :src="url"
-            class="hidden"
-            id="image"
-            alt="image-edit"
-          />
-          <div class="preview" />
-          <div id="cancel" v-if="currentImage != null">
-            <b-button class="is-danger" @click="deleteImage"
-              >사진 제거</b-button
-            >
-          </div>
+        <div class="content">
+          <section class="cropper-area">
+            <div class="img-cropper">
+              <vue-cropper
+                v-if="selectedFile != null"
+                ref="cropper"
+                :aspect-ratio="2.4"
+                :src="imgSrc"
+              />
+            </div>
+            <div id="cancel" v-if="imgSrc != null">
+              <b-button class="is-danger" @click="deleteImage"
+                >사진 제거</b-button
+              >
+            </div>
+          </section>
         </div>
       </section>
       <footer class="modal-card-foot">
@@ -77,35 +80,28 @@
 </template>
 
 <script>
-import Cropper from "cropperjs";
-import "cropperjs/dist/cropper.css";
 import Inko from "inko";
 let inko = new Inko();
+import VueCropper from "vue-cropperjs";
+import "cropperjs/dist/cropper.css";
 
 export default {
-  components: {},
+  components: {
+    VueCropper,
+  },
   props: ["email", "password", "canCancel", "title", "type", "productToModify"],
   data() {
     return {
-      currentImage: null,
-      imagePreview: "",
+      selectedFile: null,
+      imgSrc: "",
       event: {},
-      options: {
-        // for tui-image-editor component's "options" prop
-        cssMaxWidth: 700,
-        cssMaxHeight: 500,
-      },
-      src: "",
-      image: {},
-      cropper: {},
-      uploadedImage: File,
       compkey: 0,
     };
   },
   methods: {
     deleteImage() {
       this.currentImage = null;
-      this.cropper.destroy();
+      this.$refs.cropper.destroy();
     },
     processResult(res) {
       console.log(res);
@@ -126,8 +122,7 @@ export default {
     },
     submit() {
       const formData = new FormData();
-      console.log(this.cropper);
-      this.cropper.getCroppedCanvas().toBlob((blob) => {
+      this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
         const file = new File(
           [blob],
           inko.ko2en(this.event.name) + `.${blob.type.split("/")[1]}`
@@ -147,6 +142,26 @@ export default {
           });
       });
     },
+    setImage() {
+      const file = this.selectedFile;
+      console.log(file);
+      if (file.type.indexOf("image/") === -1) {
+        alert("Please select an image file");
+        return;
+      }
+      if (typeof FileReader === "function") {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          this.imgSrc = event.target.result;
+          // rebuild cropperjs with the updated source
+          console.log(this.$refs.cropper);
+          this.$refs.cropper.replace(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Sorry, FileReader API not supported");
+      }
+    },
   },
   computed: {
     startString() {
@@ -159,34 +174,6 @@ export default {
       return this.currentImage == null
         ? require("@/assets/logo.png")
         : URL.createObjectURL(this.currentImage);
-    },
-  },
-  watch: {
-    /**
-     * Watch for currnetImage to read image file and open dialog for Image Cropper.
-     * @param {File} img Image file.
-     */
-    currentImage: function (img) {
-      if (img) {
-        let image = document.getElementById("image");
-        this.src = URL.createObjectURL(img);
-        this.cropper = new Cropper(image, {
-          preview: ".preview",
-          viewMode: 2,
-          aspectRatio: 2.4,
-        });
-
-        const fr = new FileReader();
-        fr.readAsDataURL(img);
-        fr.addEventListener("load", () => {
-          // Save the file and preview.
-          this.currentImage = img;
-          this.imagePreview = fr.result;
-          // Open the crop dialog.
-        });
-        this.compkey++;
-      }
-      // console.log('mounted', this.imageObjects);
     },
   },
 };

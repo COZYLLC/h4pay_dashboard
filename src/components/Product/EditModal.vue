@@ -21,10 +21,11 @@
         </b-field>
         <b-field label="이미지 업로드">
           <b-upload
-            v-if="currentImage == null"
-            v-model="currentImage"
+            v-if="selectedFile == null"
+            v-model="selectedFile"
             drag-drop
-            accept="image/jpeg, image/png, image/gif"
+            accept="image/*"
+            @input="setImage()"
           >
             <section class="section">
               <div class="content has-text-centered">
@@ -36,20 +37,22 @@
             </section>
           </b-upload>
         </b-field>
-        <div>
-          <img
-            ref="image"
-            :src="url"
-            class="hidden"
-            id="image"
-            alt="image-edit"
-          />
-          <div class="preview" />
-          <div id="cancel" v-if="currentImage != null">
-            <b-button class="is-danger" @click="deleteImage"
-              >사진 제거</b-button
-            >
-          </div>
+        <div class="content">
+          <section class="cropper-area">
+            <div class="img-cropper">
+              <vue-cropper
+                v-if="selectedFile != null"
+                ref="cropper"
+                :aspect-ratio="1"
+                :src="imgSrc"
+              />
+            </div>
+            <div id="cancel" v-if="imgSrc != null">
+              <b-button class="is-danger" @click="deleteImage"
+                >사진 제거</b-button
+              >
+            </div>
+          </section>
         </div>
 
         <b-field label="품절 여부">
@@ -74,13 +77,15 @@
 </template>
 
 <script>
-import Cropper from "cropperjs";
-import "cropperjs/dist/cropper.css";
 import Inko from "inko";
 let inko = new Inko();
+import VueCropper from "vue-cropperjs";
+import "cropperjs/dist/cropper.css";
 
 export default {
-  components: {},
+  components: {
+    VueCropper,
+  },
   props: ["email", "password", "canCancel", "title", "type", "productToModify"],
   created() {
     //this.image = this.$refs.image;
@@ -90,8 +95,8 @@ export default {
   },
   data() {
     return {
-      currentImage: null,
-      imagePreview: "",
+      selectedFile: null,
+      imgSrc: "",
       product: {
         id: null,
         productName: null,
@@ -101,20 +106,12 @@ export default {
         soldout: false,
       },
       compkey: 0,
-      options: {
-        // for tui-image-editor component's "options" prop
-        cssMaxWidth: 700,
-        cssMaxHeight: 500,
-      },
-      src: "",
-      image: {},
-      cropper: {},
     };
   },
   methods: {
     deleteImage() {
-      this.currentImage = null;
-      this.cropper.destroy();
+      this.selectedFile = null;
+      this.$refs.cropper.destroy();
     },
     processResult(res) {
       if (res.data.status) {
@@ -135,7 +132,7 @@ export default {
     submit() {
       if (this.type == "add") {
         const formData = new FormData();
-        this.cropper.getCroppedCanvas().toBlob((blob) => {
+        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
           const file = new File(
             [blob],
             inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
@@ -160,42 +157,25 @@ export default {
           });
       }
     },
-  },
-  computed: {
-    url() {
-      return this.currentImage == null
-        ? require("@/assets/logo.png")
-        : URL.createObjectURL(this.currentImage);
-    },
-  },
-  watch: {
-    /**
-     * Watch for currnetImage to read image file and open dialog for Image Cropper.
-     * @param {File} img Image file.
-     */
-    currentImage: function (img) {
-      console.log(img);
-      if (img) {
-        let image = document.getElementById("image");
-        console.log(image);
-        this.cropper = new Cropper(image, {
-          preview: ".preview",
-          viewMode: 2,
-          aspectRatio: 1,
-        });
-        setTimeout(function () {
-          const fr = new FileReader();
-          fr.readAsDataURL(img);
-          fr.addEventListener("load", () => {
-            // Save the file and preview.
-            this.currentImage = img;
-            this.imagePreview = fr.result;
-            // Open the crop dialog.
-          });
-        }, 1000);
-        this.compkey++;
+    setImage() {
+      const file = this.selectedFile;
+      console.log(file);
+      if (file.type.indexOf("image/") === -1) {
+        alert("Please select an image file");
+        return;
       }
-      // console.log('mounted', this.imageObjects);
+      if (typeof FileReader === "function") {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          this.imgSrc = event.target.result;
+          // rebuild cropperjs with the updated source
+          console.log(this.$refs.cropper);
+          this.$refs.cropper.replace(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Sorry, FileReader API not supported");
+      }
     },
   },
 };

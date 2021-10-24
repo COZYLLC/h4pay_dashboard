@@ -38,6 +38,7 @@
 
 <script>
 // @ is an alias to /src
+import dateUtil from "@/js/dateUtil.js";
 import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
 export default {
@@ -67,21 +68,24 @@ export default {
     },
     findOrder() {
       let data = {};
+
       if (this.selectedStart != null && this.selectedEnd != null) {
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+
         // 날짜 범위 있음
         if (this.id == "") {
           // id가 비어 있으면
           data = {
             type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
+            start: this.selectedStart.toISOString(),
+            end: this.selectedEnd.toISOString(),
           };
         } else {
           // 아니면
           data = {
             type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
+            start: this.selectedStart.toISOString(),
+            end: this.selectedEnd.toISOString(),
             uid: this.id,
           };
         }

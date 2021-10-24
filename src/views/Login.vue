@@ -60,7 +60,7 @@ export default {
           console.log(res);
           if (res.data.status) {
             this.$store.commit("loginTokenM", res.data.accessToken);
-            this.$router.push({ path: "/" });
+            this.$router.push({ path: "/dashboard" });
           }
           if (!res.data.status) {
             alert("아이디 또는 비밀번호가 틀립니다.");
@@ -75,6 +75,7 @@ export default {
     },
   },
   created() {
+    alert(process.env.BASE_URL)
     this.$store.commit("logoutM");
   },
   data() {

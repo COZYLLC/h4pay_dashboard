@@ -66,7 +66,7 @@
 </template>
 
 <script>
-// @ is an alias to /src
+import dateUtil from "@/js/dateUtil.js";
 import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
 export default {
@@ -80,7 +80,7 @@ export default {
       .get(`${process.env.VUE_APP_API_URL}/product`)
       .then((productRes) => {
         if (productRes.data.status) {
-          this.products = productRes.data.list
+          this.products = productRes.data.list;
           if (this.$route.query.orderId != null) {
             this.findGift();
           }
@@ -90,11 +90,15 @@ export default {
   methods: {
     findGift() {
       this.loaded = false;
+
       let data = {};
       if (this.isMassiveGift == true) {
         this.uidfrom = "massiveGift";
       }
       if (this.selectedStart != null && this.selectedEnd != null) {
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+        console.log(this.selectedStart.toISOString());
+        console.log(this.selectedEnd.toISOString());
         console.log("날짜 범위 있음");
         // 날짜 범위 있음
         if (this.uidfrom != null || this.uidto != null) {
@@ -102,8 +106,8 @@ export default {
           // ID중 하나라도 비어있지 않으면
           data = {
             type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
+            start: this.selectedStart.toISOString(),
+            end: this.selectedEnd.toISOString(),
             uidfrom: this.uidfrom,
             uidto: this.uidto,
           };
@@ -113,8 +117,8 @@ export default {
           // 모두 다 비어있으면
           data = {
             type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
+            start: this.selectedStart.toISOString(),
+            end: this.selectedEnd.toISOString(),
           };
         }
       } else if (this.selectedStart == null && this.selectedEnd == null) {
@@ -145,9 +149,9 @@ export default {
             this.data = giftRes.data.result;
             console.log(this.isMassiveGift);
             if (this.isMassiveGift == false) {
-              this.data = this.data.filter(
-                (gift) => gift.uidfrom != "massiveGift"
-              ).reverse();
+              this.data = this.data
+                .filter((gift) => gift.uidfrom != "massiveGift")
+                .reverse();
             }
             this.loaded = true;
           }

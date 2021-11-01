@@ -3,12 +3,13 @@ import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Order from '@/views/Order'
 import Gift from '@/views/Gift'
-import Bulk from '@/views/Bulk'
+import Bulk from '@/views/Bulk/Bulk'
+import BulkReq from '@/views/Bulk/BulkReq'
+import BulkWithoutApprove from '@/views/Bulk/BulkWithoutApprove'
 import Event from '@/views/Event'
 import Product from '@/views/Product'
 import Login from "@/views/Login"
 import Register from "@/views/Register"
-import BulkReq from '@/views/BulkReq'
 import Success from '@/views/Success'
 
 Vue.use(VueRouter);
@@ -35,6 +36,16 @@ const routes = [
     component: Bulk,
   },
   {
+    path: "/gift/bulk/lookup",
+    name: "BulkReq",
+    component: BulkReq,
+  },
+  {
+    path: "/gift/bulk/noapprove",
+    name: "BulkWithoutApprove",
+    component: BulkWithoutApprove,
+  },
+  {
     path: "/event",
     name: "Event",
     component: Event,
@@ -59,11 +70,6 @@ const routes = [
     meta: {
       hideNavigation: true
     }
-  },
-  {
-    path: "/gift/bulk/lookup",
-    name: "BulkReq",
-    component: BulkReq,
   },
   {
     path: "/success",

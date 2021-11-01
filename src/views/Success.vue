@@ -1,8 +1,15 @@
 <template>
-  <div></div>
+  <div />
 </template>
 <script>
 export default {
+  data() {
+    return {
+      orderId: "",
+      paymentKey: "",
+      amount: "",
+    };
+  },
   created() {
     this.getParams();
     this.approveBulk();
@@ -15,19 +22,22 @@ export default {
     },
     approveBulk() {
       const tempOrder = JSON.parse(localStorage.getItem("tempApprove"));
-      console.log(tempOrder)
-      console.log(this.amount)
+      console.log(tempOrder);
+      console.log(this.amount);
       if (
         tempOrder.orderId == this.orderId &&
         tempOrder.amount == this.amount
       ) {
         this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/bulk/${tempOrder.requestId}/approve`, {
-            paymentKey: this.paymentKey,
-            orderId: this.orderId
-          })
+          .post(
+            `${process.env.VUE_APP_API_URL}/bulk/${tempOrder.requestId}/approve`,
+            {
+              paymentKey: this.paymentKey,
+              orderId: this.orderId,
+            }
+          )
           .then((res) => {
-              console.log(res)
+            console.log(res);
             if (res.data.status) {
               alert("대량발주 승인에 성공했습니다!");
               this.$router.push("/");
@@ -38,13 +48,6 @@ export default {
           });
       }
     },
-  },
-  data() {
-    return {
-      orderId: "",
-      paymentKey: "",
-      amount: "",
-    };
   },
 };
 </script>

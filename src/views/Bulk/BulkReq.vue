@@ -39,7 +39,7 @@
 <script>
 // @ is an alias to /src
 import Table from "@/components/Table";
-import TableLoading from "../components/TableLoading.vue";
+import TableLoading from "../../components/TableLoading.vue";
 export default {
   name: "Home",
   components: {

@@ -11,9 +11,6 @@ import axios from 'axios'
 import Chart from 'chart.js'
 import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
-import vueMoment from 'vue-moment';
-import moment from 'moment-timezone'
-
 
 library.add(faSignOutAlt, faUser, faUsers, faRocket, faClipboardList, faGift, faBoxes, faSearch, faPlus, faTrash, faPaperPlane, faArrowUp, faAngleRight, faAngleLeft, faCalendar, faUpload, faFileDownload, faKeyboard, faHome, faEye, faEyeSlash, faCheck, faExclamationCircle, faScroll)
 Vue.component('vue-fontawesome', FontAwesomeIcon)
@@ -22,10 +19,6 @@ Vue.use(buefy, {
   defaultIconComponent: 'vue-fontawesome',
   defaultIconPack: 'fas'
 });
-Vue.use(vueMoment, {
-  moment
-})
-
 
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axios

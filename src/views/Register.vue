@@ -147,16 +147,19 @@ export default {
 
   methods: {
     checkValidKey(role) {
-      console.log(process.env.VUE_APP_AUTH_CODE_ADMIN);
+      console.log(role)
       let valid = false;
       switch (role) {
         case "A":
+          console.log(process.env.VUE_APP_AUTH_CODE_ADMIN);
           valid = this.form.code == process.env.VUE_APP_AUTH_CODE_ADMIN;
           break;
         case "AT":
+          console.log(process.env.VUE_APP_AUTH_CODE_ADMIN_TEACHER);
           valid = this.form.code == process.env.VUE_APP_AUTH_CODE_ADMIN_TEACHER;
           break;
         case "T":
+          console.log(process.env.VUE_APP_AUTH_CODE_TEACHER);
           valid = this.form.code == process.env.VUE_APP_AUTH_CODE_TEACHER;
           break;
       }
@@ -257,24 +260,15 @@ export default {
         this.pwState &&
         this.pw2State &&
         this.idState &&
-        this.checkValidKey(this.form.role) &&
         this.roleState &&
         this.nameState
       ) {
         if (this.checkState) {
-          if (this.form.role == "S") {
-            if (this.form.studentid == "" || this.form.studentid.length != 4) {
-              alert("학번은 4자리로 입력해주세요.");
-            } else {
-              this.sendRequest();
-            }
-          } else if (this.form.role == "T") {
-            if (this.bulkCodeState) {
-              this.form.studentid == null;
-              this.sendRequest();
-            } else {
-              alert("올바른 선생님 인증 코드를 입력해주세요!");
-            }
+          if (this.codeState) {
+            this.form.studentid == null;
+            this.sendRequest();
+          } else {
+            alert("올바른 선생님 인증 코드를 입력해주세요!");
           }
         } else {
           alert("약관에 모두 동의해주세요!");
@@ -335,8 +329,8 @@ export default {
         this.form.password == this.form.password2 && this.form.password2 != null
       );
     },
-    bulkCodeState() {
-      return this.form.bulkCode == process.env.VUE_APP_BULK_CODE;
+    codeState() {
+      return this.checkValidKey(this.form.role);
     },
   },
 };

@@ -1,0 +1,98 @@
+[
+    {
+        "title": "이벤트",
+        "icon": "rocket",
+        "route": "/event",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
+        "title": "주문",
+        "icon": "clipboard-list",
+        "route": "/order",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
+        "title": "선물",
+        "icon": "gift",
+        "route": "/gift",
+        "active": false,
+        "expanded": false,
+        "children": [
+            {
+                "title": "조회",
+                "icon": "search",
+                "route": "",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
+                "title": "대량선물 요청",
+                "icon": "paper-plane",
+                "route": "bulk",
+                "role": [
+                    "SA",
+                    "A",
+                    "T",
+                    "AT"
+                ]
+            },
+            {
+                "title": "대량선물 조회 및 승인",
+                "icon": "scroll",
+                "route": "bulk/lookup",
+                "role": [
+                    "SA",
+                    "A",
+                    "T",
+                    "AT"
+                ]
+            },
+            {
+                "title": "대량선물",
+                "icon": "scroll",
+                "route": "bulk/noapprove",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "제품",
+        "icon": "boxes",
+        "route": "/product?page=1",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "S",
+            "AT"
+        ]
+    },
+    {
+        "title": "로그아웃",
+        "icon": "sign-out-alt",
+        "route": "/login",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "S",
+            "T",
+            "AT"
+        ]
+    }
+]

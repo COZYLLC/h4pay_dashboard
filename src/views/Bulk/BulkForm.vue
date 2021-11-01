@@ -104,40 +104,8 @@
 <script>
 export default {
   created() {
-    this.$store.dispatch("loginCheckA").then(
-      function () {
-        if (
-          this.$store.getters.getName == null ||
-          this.$store.getters.getRole == null
-        ) {
-          this.$router.push("/login");
-        } else {
-          this.customer.name = this.$store.getters.getName;
-          this.customer.role = this.$store.getters.getRole;
-          this.customer.uid = this.$store.getters.getUid;
-          if (this.customer.role == "T" || this.customer.role == "A") {
-            this.customer.teacherCheck = true;
-          }
-        }
-      }.bind(this)
-    );
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((res) => {
-        if (res != undefined) {
-          res.data.list.forEach((item) => {
-            this.prodList.push({
-              value: item.id,
-              text: item.productName,
-            });
-          });
-        }
-        console.log(this.prodList);
-      })
-      .catch((error) => {
-        this.$Sentry.captureException(error);
-        alert("제품 목록을 불러오지 못했습니다. 개발자에게 문의해주세요. (1)");
-      });
+    this.fetchUser();
+    this.fetchProduct();
   },
   data() {
     return {
@@ -157,6 +125,46 @@ export default {
     };
   },
   methods: {
+    fetchUser() {
+      this.$store.dispatch("loginCheckA").then(
+        function () {
+          if (
+            this.$store.getters.getName == null ||
+            this.$store.getters.getRole == null
+          ) {
+            this.$router.push("/login");
+          } else {
+            this.customer.name = this.$store.getters.getName;
+            this.customer.role = this.$store.getters.getRole;
+            this.customer.uid = this.$store.getters.getUid;
+            if (this.customer.role == "T" || this.customer.role == "A") {
+              this.customer.teacherCheck = true;
+            }
+          }
+        }.bind(this)
+      );
+    },
+    fetchProduct() {
+      this.$axios
+        .get(`${process.env.VUE_APP_API_URL}/product`)
+        .then((res) => {
+          if (res != undefined) {
+            res.data.list.forEach((item) => {
+              this.prodList.push({
+                value: item.id,
+                text: item.productName,
+              });
+            });
+          }
+          console.log(this.prodList);
+        })
+        .catch((error) => {
+          this.$Sentry.captureException(error);
+          alert(
+            "제품 목록을 불러오지 못했습니다. 개발자에게 문의해주세요. (1)"
+          );
+        });
+    },
     goToUpload() {
       const customer = this.customer;
       if (customer.reason == "") {
@@ -179,31 +187,8 @@ export default {
       }
     },
     submit() {
-      console.log(this.form);
-      console.log(this.file);
-      if (typeof this.file == "function") {
-        alert("파일을 업로드해주세요!");
-      } else {
-        this.form.append("excel", this.file);
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/bulk/request`, this.form, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((res) => {
-            console.log(res);
-            if (res.data.status == true) {
-              alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
-            } else {
-              alert(res.data.message);
-            }
-          })
-          .catch((error) => {
-            this.$Sentry.captureException(error);
-            alert(error.status);
-          });
-      }
+      this.form.append("excel", this.file);
+      this.$emit("submit", this.form);
     },
   },
 };

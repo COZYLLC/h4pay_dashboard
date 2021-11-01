@@ -21,13 +21,21 @@
               >
                 <b-input
                   v-model="pw"
-                  @keyup.native.enter="submit"
                   type="password"
                   password-reveal
+                  @keyup.native.enter="submit"
                 ></b-input>
               </b-field>
-              <b-button @click="submit" class="is-primary" style="margin-right:10px">로그인</b-button>
-              <b-button @click="$router.push('register')" class="is-primary">회원가입</b-button>
+              <b-button
+                class="is-primary"
+                style="margin-right: 10px"
+                @click="submit"
+              >
+                로그인
+              </b-button>
+              <b-button class="is-primary" @click="$router.push('register')">
+                회원가입
+              </b-button>
             </div>
           </div>
         </div>
@@ -49,6 +57,23 @@
 <script>
 import { createHash } from "crypto";
 export default {
+  data() {
+    return {
+      id: "",
+      pw: "",
+    };
+  },
+  computed: {
+    idState() {
+      return this.id.length > 0 && this.id != "";
+    },
+    pwState() {
+      return this.pw.length > 0 && this.pw != "";
+    },
+  },
+  created() {
+    this.$store.commit("logoutM");
+  },
   methods: {
     submit() {
       this.$axios
@@ -72,24 +97,6 @@ export default {
             alert("서버 오류입니다. 개발자에게 문의해주세요.");
           }
         });
-    },
-  },
-  created() {
-    alert(process.env.BASE_URL)
-    this.$store.commit("logoutM");
-  },
-  data() {
-    return {
-      id: "",
-      pw: "",
-    };
-  },
-  computed: {
-    idState() {
-      return this.id.length > 0 && this.id != "";
-    },
-    pwState() {
-      return this.pw.length > 0 && this.pw != "";
     },
   },
 };

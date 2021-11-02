@@ -3,13 +3,13 @@
 import { Line } from "vue-chartjs";
 
 export default {
-  props: ['labels', 'datasets'],
   extends: Line,
+  props: ["labels", "datasets"],
   mounted() {
     // Overwriting base render method with actual data.
     this.renderChart({
       labels: this.labels,
-      datasets: this.datasets
+      datasets: this.datasets,
     });
   },
 };

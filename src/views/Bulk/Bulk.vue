@@ -22,13 +22,15 @@ export default {
             console.log(res);
             if (res.data.status == true) {
               alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
+              this.$router.push("/gift");
             } else {
               alert(res.data.message);
+              this.$router.push("/gift");
             }
           })
           .catch((error) => {
-            this.$Sentry.captureException(error);
             alert(error.status);
+            this.$router.push("/gift");
           });
       }
     },

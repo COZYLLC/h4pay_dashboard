@@ -1,5 +1,5 @@
 <template>
-  <div id="bulkform" v-if="customer.teacherCheck">
+  <div v-if="customer.teacherCheck" id="bulkform">
     <p class="title is-8" style="margin-bottom: 5vh">교내 매점 쿠폰 대량발주</p>
     <b-steps v-model="activeStep" :has-navigation="false">
       <b-step-item step="1" label="양식 다운로드" icon="file-download">
@@ -10,20 +10,21 @@
 
         <a :href="tempURL">
           <b-button
-            @click="activeStep = 1"
             variant="primary"
             size="lg"
             style="margin-bottom: 20px"
+            @click="activeStep = 1"
             >양식 다운로드</b-button
           ></a
         >
         <b-button
-          @click="activeStep = 1"
           variant="primary"
           size="lg"
           style="margin-bottom: 20px; margin-left: 20px"
-          >이미 양식이 있어요.</b-button
+          @click="activeStep = 1"
         >
+          이미 양식이 있어요.
+        </b-button>
       </b-step-item>
       <b-step-item step="2" label="정보 입력" icon="keyboard">
         <p>
@@ -69,12 +70,13 @@
           />
         </b-field>
         <b-button
-          @click="goToUpload"
           class="is-primary"
           size="lg"
           style="float: right"
-          >다음</b-button
+          @click="goToUpload"
         >
+          다음
+        </b-button>
       </b-step-item>
       <b-step-item step="2" label="학생 명단 업로드" icon="upload">
         <b-field label="엑셀 파일 업로드">
@@ -94,19 +96,15 @@
             </section>
           </b-upload>
         </b-field>
-        <b-button @click="submit" class="is-primary" style="float: right"
-          >제출</b-button
-        >
+        <b-button class="is-primary" style="float: right" @click="submit">
+          제출
+        </b-button>
       </b-step-item>
     </b-steps>
   </div>
 </template>
 <script>
 export default {
-  created() {
-    this.fetchUser();
-    this.fetchProduct();
-  },
   data() {
     return {
       activeStep: 0,
@@ -123,6 +121,10 @@ export default {
       prodList: [],
       tempURL: process.env.VUE_APP_API_URL + "/../excelTemplate.xlsx",
     };
+  },
+  created() {
+    this.fetchUser();
+    this.fetchProduct();
   },
   methods: {
     fetchUser() {
@@ -159,7 +161,6 @@ export default {
           console.log(this.prodList);
         })
         .catch((error) => {
-          this.$Sentry.captureException(error);
           alert(
             "제품 목록을 불러오지 못했습니다. 개발자에게 문의해주세요. (1)"
           );

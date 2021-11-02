@@ -9,7 +9,10 @@ export default {
   },
   methods: {
     submit(data) {
-      if (typeof data.get("excel") == "function") {
+      if (
+        typeof data.get("excel") == "function" &&
+        data.get("excel") == undefined
+      ) {
         alert("파일을 업로드해주세요!");
       } else {
         this.$axios
@@ -27,19 +30,30 @@ export default {
             }
           })
           .catch((error) => {
-            this.$Sentry.captureException(error);
             alert(error.status);
           });
       }
     },
     approveDirectly(requestId) {
-        const data = {
-            id: 'noPayment',
-        }
       this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/v2/bulk/${requestId}/approve`,data)
+        .post(`${process.env.VUE_APP_API_URL}/bulk/${requestId}/approve`)
         .then((res) => {
-          console.log(res);
+          if (res.data.status) {
+            this.$buefy.notification.open({
+              message: "정상 처리되었습니다.",
+              type: "is-primary",
+              duration: 1000,
+            });
+            this.$router.push("/gift");
+          } else {
+            this.$buefy.notification.open({
+              message:
+                "대량발주 처리에 실패했습니다. 개발자에게 문의 바랍니다.",
+              type: "is-primary",
+              duration: 1000,
+            });
+            this.$router.push("/gift");
+          }
         });
     },
   },

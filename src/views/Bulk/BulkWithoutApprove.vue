@@ -48,7 +48,7 @@ export default {
           } else {
             this.$buefy.notification.open({
               message:
-                "대량발주 처리에 실패했습니다. 개발자에게 문의 바랍니다.",
+                "대량선물 처리에 실패했습니다. 개발자에게 문의 바랍니다.",
               type: "is-primary",
               duration: 1000,
             });

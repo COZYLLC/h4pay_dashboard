@@ -1,10 +1,11 @@
 <template>
   <div class="home">
-    <p class="title is-8">주문 내역 조회</p>
+    <p class="title is-8">상품권 선물 요청 조회</p>
     <p class="subtitle is-8">
-      주문 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
+      상품권 선물 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수
+      있습니다.
     </p>
-    <b-field label="주문 내역 날짜 범위 선택" grouped>
+    <b-field label="요청 내역 날짜 범위 선택" grouped>
       <b-datepicker v-model="selectedStart" :mobile-native="false">
         <template v-slot:trigger>
           <b-button icon-left="calendar" type="is-primary" />
@@ -22,10 +23,10 @@
     <b-field label="ID로 검색">
       <b-input v-model="id" type="text"></b-input>
     </b-field>
-    <b-button type="is-primary" @click="findOrder"> 조회 </b-button>
+    <b-button type="is-primary" @click="findRequest"> 조회 </b-button>
     <Table
       v-if="loaded"
-      type="order"
+      type="voucherReq"
       :products="products"
       :columns="columns"
       :data="data"
@@ -33,10 +34,7 @@
       :checkable="true"
     >
       <template v-slot:detail="props">
-        <PurchaseDetail :item="props.row.item" :products="products" />
-      </template>
-      <template v-slot:control="props">
-        <PurchaseControl type="order" :checked-rows="props.checkedRows" />
+        <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
       </template>
     </Table>
     <table-loading v-else-if="loaded == false" />
@@ -44,18 +42,13 @@
 </template>
 
 <script>
-// @ is an alias to /src
-import dateUtil from "@/js/dateUtil.js";
 import Table from "@/components/Table";
-import TableLoading from "../components/TableLoading.vue";
-import PurchaseDetail from "@/components/Purchase/Detail.vue";
-import PurchaseControl from "@/components/Purchase/Control.vue";
+import TableLoading from "../../components/TableLoading.vue";
 export default {
+  name: "Home",
   components: {
     Table,
     TableLoading,
-    PurchaseDetail,
-    PurchaseControl,
   },
   data() {
     return {
@@ -66,35 +59,39 @@ export default {
       data: [],
       products: [],
       table: {
-        detailKey: "orderId",
+        detailKey: "id",
         page: 1,
         checkedRows: [],
       },
       columns: [
         {
-          field: "orderId",
-          label: "주문번호",
+          field: "id",
+          label: "요청ID",
           width: 1,
         },
         {
-          field: "uid",
-          label: "주문자 ID",
+          field: "issuerId",
+          label: "요청자 ID",
         },
         {
-          field: "amount",
-          label: "결제금액",
+          field: "issuerName",
+          label: "요청자 이름",
         },
         {
           field: "date",
-          label: "주문 일시",
+          label: "요청 일시",
         },
         {
-          field: "expire",
-          label: "교환 만료 일시",
+          field: "approved",
+          label: "승인 여부",
         },
         {
-          field: "exchanged",
-          label: "교환 여부",
+          field: "amount",
+          label: "상품권 금액",
+        },
+        {
+          field: "qty",
+          label: "요청 개수",
         },
       ],
     };
@@ -112,9 +109,9 @@ export default {
       .get(`${process.env.VUE_APP_API_URL}/product`)
       .then((productRes) => {
         if (productRes.data.status) {
-          this.products = productRes.data.list;
+          this.products = productRes.data.list.reverse();
           if (this.$route.query.orderId != null) {
-            this.findOrder();
+            this.findRequest();
           }
         }
       });
@@ -126,26 +123,23 @@ export default {
     setPage(value) {
       this.page = value;
     },
-    findOrder() {
+    findRequest() {
       let data = {};
-
       if (this.selectedStart != null && this.selectedEnd != null) {
-        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
-
         // 날짜 범위 있음
         if (this.id == "") {
           // id가 비어 있으면
           data = {
             type: "date",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
+            start: this.selectedStart,
+            end: this.selectedEnd,
           };
         } else {
           // 아니면
           data = {
             type: "all",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
+            start: this.selectedStart,
+            end: this.selectedEnd,
             uid: this.id,
           };
         }
@@ -163,12 +157,13 @@ export default {
         }
       }
       console.log(data);
+      this.loaded = true;
       this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/orders/filter`, data)
-        .then((orderRes) => {
-          console.log(orderRes);
-          if (orderRes.data.status) {
-            this.data = orderRes.data.result.reverse();
+        .get(`${process.env.VUE_APP_API_URL}/bulk/request/`)
+        .then((requestRes) => {
+          console.log(requestRes);
+          if (requestRes.data.status) {
+            this.data = requestRes.data.result;
             this.loaded = true;
             this.$buefy.notification.open({
               message: "조회에 성공했습니다!",

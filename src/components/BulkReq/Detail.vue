@@ -6,7 +6,7 @@
         {{ studentId }} {{ names[i] }}
       </li>
     </ul>
-    <div v-else>아직 아무도 혜택을 받지 않은 것 같네요.</div>
+    <div v-else>수신자 데이터가 없는 것 같아요. 관리자에게 문의해주세요.</div>
   </div>
 </template>
 <script>

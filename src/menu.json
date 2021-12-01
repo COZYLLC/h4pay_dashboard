@@ -60,9 +60,51 @@
                 ]
             },
             {
-                "title": "대량선물",
+                "title": "무승인 대량선물",
                 "icon": "scroll",
                 "route": "bulk/noapprove",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "상품권",
+        "icon": "credit-card",
+        "route":"/voucher",
+        "active": false,
+        "expanded":false,
+        "role":[
+            "SA",
+            "AT",
+            "T"
+        ],
+        "children": [
+            {
+                "title": "상품권 대량선물",
+                "icon": "paper-plane",
+                "route": "bulk",
+                "role": [
+                    "SA",
+                    "AT",
+                    "T"
+                ]
+            },
+            {
+                "title": "무승인 상품권 대량선물",
+                "icon": "paper-plane",
+                "route": "bulk/noapprove",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
+                "title": "상품권 발행 내역",
+                "icon": "pen-nib",
+                "route": "log/publish",
                 "role": [
                     "SA",
                     "AT"

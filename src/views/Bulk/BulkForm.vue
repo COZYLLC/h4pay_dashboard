@@ -1,6 +1,6 @@
 <template>
   <div v-if="customer.teacherCheck" id="bulkform">
-    <p class="title is-8" style="margin-bottom: 5vh">교내 매점 쿠폰 대량발주</p>
+    <p class="title is-8" style="margin-bottom: 5vh">교내 매점 쿠폰 대량선물</p>
     <b-steps v-model="activeStep" :has-navigation="false">
       <b-step-item step="1" label="양식 다운로드" icon="file-download">
         <p>
@@ -8,7 +8,7 @@
           입력해주세요.
         </p>
 
-        <a :href="tempURL">
+        <a :href="templateURL">
           <b-button
             variant="primary"
             size="lg"
@@ -119,7 +119,7 @@ export default {
       product: null,
       form: FormData,
       prodList: [],
-      tempURL: process.env.VUE_APP_API_URL + "/../excelTemplate.xlsx",
+      templateURL: process.env.VUE_APP_API_URL + "/../excelTemplate.xlsx",
     };
   },
   created() {

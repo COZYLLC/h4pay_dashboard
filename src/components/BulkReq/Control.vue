@@ -1,12 +1,12 @@
 <template>
-  <div class="has-text-right" v-if="checkedRows.length != 0">
-<!--     <b-button class="is-primary" @click="modalActive = true"
+  <div v-if="checkedRows.length != 0" class="has-text-right">
+    <!--     <b-button class="is-primary" @click="modalActive = true"
       >지출품의서 다운로드</b-button
     > -->
     <div v-if="checkedRows">
-      <b-button class="is-primary" style="margin-left: 10px" @click="payment"
-        >승인</b-button
-      >
+      <b-button class="is-primary" style="margin-left: 10px" @click="payment">
+        승인
+      </b-button>
     </div>
   </div>
 </template>
@@ -16,13 +16,12 @@ import { loadTossPayments } from "@tosspayments/sdk";
 import orderIdgen from "@/js/orderidgen";
 
 export default {
-  props: ["checkedRows"],
+  props: ["checkedRows", "type"],
   data() {
     return {
       modalActive: false,
       formProps: {},
       title: "",
-      type: "",
       product: "",
     };
   },
@@ -47,7 +46,7 @@ export default {
         .requestPayment("카드", {
           amount: this.checkedRows[0].amount,
           orderId: orderId,
-          orderName: "서전고 사회적협동조합 대량발주",
+          orderName: "서전고 사회적협동조합 대량선물",
           customerName: this.checkedRows[0].senderName,
           successUrl: window.location.origin + "/success",
           failUrl: window.location.origin + "/fail",

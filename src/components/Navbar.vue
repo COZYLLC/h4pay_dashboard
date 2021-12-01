@@ -1,13 +1,5 @@
 <template>
-  <b-sidebar
-    position="static"
-    mobile="reduce"
-    expand-on-hover="false"
-    delay="500"
-    fullheight
-    type="is-light"
-    open
-  >
+  <b-sidebar position="static" mobile="reduce" fullheight type="is-light" open>
     <div class="p-4">
       <div class="block">
         <img

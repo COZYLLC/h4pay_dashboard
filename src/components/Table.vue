@@ -2,6 +2,7 @@
   <section>
     <b-table
       ref="table"
+      class="table"
       :data="data"
       paginated
       per-page="10"
@@ -14,6 +15,8 @@
       :checked-rows.sync="checkedRows"
       :header-checkable="false"
       :current-page.sync="page"
+      default-sort="date"
+      default-sort-direction="desc"
       :is-row-checkable="
         (row) =>
           checkedRows.length == 0 ||
@@ -25,6 +28,7 @@
       aria-previous-label="Previous page"
       aria-page-label="Page"
       aria-current-label="Current page"
+      scrollable
       @page-change="onPageChange"
     >
       <b-table-column
@@ -33,8 +37,9 @@
         v-slot="props"
         :field="column.field"
         :label="column.label"
-        :width="column.field == 'orderId' ? 10 : null"
+        :width="column.width"
         centered
+        sortable
       >
         <template v-if="isDateField(column.field)">
           <!-- 날짜필드 -->
@@ -50,6 +55,9 @@
         </template>
         <template v-else-if="column.field == 'issuer'">
           {{ props.row.issuer.uid }}
+        </template>
+        <template v-else-if="column.field == 'receiver'">
+          {{ props.row.receiver.name }} / {{ props.row.receiver.tel }}
         </template>
         <template v-else-if="typeof props.row[column.field] == 'boolean'">
           <!-- 교환여부 등 불린 필드 -->
@@ -127,5 +135,10 @@ export default {
 <style>
 .media {
   border: none !important;
+}
+@media screen and (min-width: 768px) {
+  .table {
+    width: calc(100vw - 310px);
+  }
 }
 </style>

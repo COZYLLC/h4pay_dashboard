@@ -1,9 +1,9 @@
 <template>
-  <div v-if="checkedRows.length != 0" class="has-text-right">
+  <div v-if="checkedRows.length == 1" class="has-text-right">
     <!--     <b-button class="is-primary" @click="modalActive = true"
       >지출품의서 다운로드</b-button
     > -->
-    <div v-if="checkedRows">
+    <div v-if="!checkedRows[0].approved">
       <b-button class="is-primary" style="margin-left: 10px" @click="payment">
         승인
       </b-button>
@@ -16,7 +16,7 @@ import { loadTossPayments } from "@tosspayments/sdk";
 import orderIdgen from "@/js/orderidgen";
 
 export default {
-  props: ["checkedRows", "type"],
+  props: ["type", "checkedRows"],
   data() {
     return {
       modalActive: false,
@@ -26,25 +26,34 @@ export default {
     };
   },
   methods: {
-    saveToLocalStorage(orderId) {
+    saveToLocalStorage(orderId, amount) {
       localStorage.setItem(
         "tempApprove",
         JSON.stringify({
           orderId: orderId,
           requestId: this.checkedRows[0].id,
-          amount: this.checkedRows[0].amount,
+          amount: amount,
         })
       );
     },
     async payment() {
-      const orderId = "2" + orderIdgen.orderIdgen();
-      this.saveToLocalStorage(orderId);
+      const request = this.checkedRows[0]
+      if (this.type != "voucher" && this.type != "gift") {
+        this.$toast.open({
+          message: "대량선물 승인에 실패했습니다.",
+          type:"is-danger"
+        })
+        return
+      }
+      const orderId = (this.type == "voucher" ? 3 : this.type == "gift" ? 2 : null) + orderIdgen.orderIdgen();
+      const amount = this.type == "gift" ? request.amount : this.type == "voucher" ? request.amount * request.targets.length : null;
+      this.saveToLocalStorage(orderId, amount);
       const tossPayments = await loadTossPayments(
         process.env.VUE_APP_TOSS_CLIENTKEY
       );
       tossPayments
         .requestPayment("카드", {
-          amount: this.checkedRows[0].amount,
+          amount: amount,
           orderId: orderId,
           orderName: "서전고 사회적협동조합 대량선물",
           customerName: this.checkedRows[0].senderName,

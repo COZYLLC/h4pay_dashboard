@@ -189,6 +189,7 @@ export default {
     },
     submit() {
       this.form.append("excel", this.file);
+      console.log(this.form.values());
       this.$emit("submit", this.form);
     },
   },

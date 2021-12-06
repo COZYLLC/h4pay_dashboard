@@ -34,7 +34,7 @@
         <div v-for="j in 3" :key="j" class="column">
           <image-card
             v-if="(i - 1) * 3 + (j - 1) < vouchers.length"
-            img="https://bulma.io/images/placeholders/1280x960.png"
+            :src="require('@/assets/notready.png') /* 실제 사진명으로 변경요망*/" 
             @click="cardClick((i - 1) * 3 + (j - 1))"
           >
             <template v-slot:content>
@@ -55,7 +55,8 @@
           <section class="section">
             <div class="content has-text-centered">
               <p>
-                <b-icon icon="upload" size="is-large"> </b-icon>
+                <b-icon icon="upload" size="is-large">
+                </b-icon>
               </p>
               <p v-if="typeof file == 'function'">
                 파일을 선택하거나 드래그하세요

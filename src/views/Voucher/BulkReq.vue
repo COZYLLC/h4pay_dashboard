@@ -1,6 +1,8 @@
 <template>
   <div class="home">
-    <p class="title is-8">상품권 선물 요청 조회</p>
+    <p class="title is-8">
+      상품권 선물 요청 조회
+    </p>
     <p class="subtitle is-8">
       상품권 선물 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수
       있습니다.
@@ -20,10 +22,16 @@
       <b-input expanded readonly :value="endString" />
     </b-field>
 
-    <b-field label="ID로 검색">
-      <b-input v-model="id" type="text"></b-input>
+    <b-field label="요청 내역 금액 범위 선택" grouped>
+      <b-input v-model="amountMin" type="number" expanded></b-input>
+      <b-input v-model="amountMax" type="number" expanded></b-input>
     </b-field>
-    <b-button type="is-primary" @click="findRequest"> 조회 </b-button>
+    <b-field label="요청자 ID로 검색" grouped>
+      <b-input v-model="id" type="text" expanded></b-input>
+    </b-field>
+    <b-button type="is-primary" @click="findRequest">
+      조회
+    </b-button>
     <Table
       v-if="loaded"
       type="voucherReq"
@@ -34,7 +42,13 @@
       :checkable="true"
     >
       <template v-slot:detail="props">
-        <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
+        <BulkReqDetail
+          :names="getSpecificValuesInTargets(props.row.targets, 'name')"
+          :targets="getSpecificValuesInTargets(props.row.targets, 'tel')"
+        />
+      </template>
+      <template v-slot:control="props">
+        <BulkReqControl type="voucher" :checked-rows="props.checkedRows" />
       </template>
     </Table>
     <table-loading v-else-if="loaded == false" />
@@ -44,16 +58,23 @@
 <script>
 import Table from "@/components/Table";
 import TableLoading from "../../components/TableLoading.vue";
+import BulkReqDetail from "@/components/BulkReq/Detail.vue";
+import BulkReqControl from "@/components/BulkReq/Control.vue";
+import dateUtil from "@/js/dateUtil.js";
 export default {
   name: "Home",
   components: {
     Table,
     TableLoading,
+    BulkReqDetail,
+    BulkReqControl,
   },
   data() {
     return {
       selectedStart: null,
       selectedEnd: null,
+      amountMin: null,
+      amountMax: null,
       id: "",
       loaded: null,
       data: [],
@@ -70,12 +91,8 @@ export default {
           width: 1,
         },
         {
-          field: "issuerId",
-          label: "요청자 ID",
-        },
-        {
-          field: "issuerName",
-          label: "요청자 이름",
+          field: "issuer",
+          label: "요청자",
         },
         {
           field: "date",
@@ -88,10 +105,6 @@ export default {
         {
           field: "amount",
           label: "상품권 금액",
-        },
-        {
-          field: "qty",
-          label: "요청 개수",
         },
       ],
     };
@@ -117,6 +130,10 @@ export default {
       });
   },
   methods: {
+    getSpecificValuesInTargets(targets, key) {
+      const newList = targets.map((target) => target[key]);
+      return newList;
+    },
     setCheckedRows(value) {
       this.checkedRows = value;
     },
@@ -124,42 +141,26 @@ export default {
       this.page = value;
     },
     findRequest() {
-      let data = {};
-      if (this.selectedStart != null && this.selectedEnd != null) {
-        // 날짜 범위 있음
-        if (this.id == "") {
-          // id가 비어 있으면
-          data = {
-            type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-          };
-        } else {
-          // 아니면
-          data = {
-            type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-            uid: this.id,
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        // 날짜 범위 없음
-        if (this.id == "") {
-          data = {
-            type: "null",
-          };
-        } else {
-          data = {
-            type: "uid",
-            uid: this.id,
-          };
-        }
-      }
-      console.log(data);
       this.loaded = true;
+      if (this.selectedEnd != null) {
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+      }
       this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/bulk/request/`)
+        .get(`${process.env.VUE_APP_API_URL}/voucher/request/filter`, {
+          params: {
+            dateFrom:
+              this.selectedStart != null
+                ? this.selectedStart.toISOString()
+                : undefined,
+            dateTo:
+              this.selectedEnd != null
+                ? this.selectedEnd.toISOString()
+                : undefined,
+            issuer: this.id || undefined,
+            amountMin: this.amountMin || undefined,
+            amountMax: this.amountMax || undefined,
+          },
+        })
         .then((requestRes) => {
           console.log(requestRes);
           if (requestRes.data.status) {

@@ -17,28 +17,35 @@ export default {
   methods: {
     submit(formData) {
       this.$store.dispatch("loginCheckA").then(() => {
-        const token = this.$store.getters.getToken;
         const uid = this.$store.getters.getUid;
         const name = this.$store.getters.getName;
-        formData.append("issuerId", uid);
-        formData.append("issuerName", name);
+        const issuer = {
+          uid: uid,
+          name: name,
+        };
+        formData.append("issuer", JSON.stringify(issuer));
+
         this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/voucher/bulk`, formData, {
-            headers: {
-              "X-Access-Token": token,
-            },
-          })
+          .post(`${process.env.VUE_APP_API_URL}/voucher/request`, formData)
           .then((res) => {
+            console.log(res);
             if (res.status == 200) {
               this.$buefy.notification.open({
-                message: "상품권 발행 및 선물이 정상 처리되었습니다.",
+                message: "상품권 발행 및 선물 요청이 정상 처리되었습니다.",
                 type: "is-success",
                 duration: 1000,
               });
               this.$router.push("/voucher/log/publish");
+            } else if (res.status == 500) {
+              this.$buefy.notification.open({
+                message:
+                  "요청에 실패했습니다. 서버 내부 오류입니다. 관리자에게 문의해주세요.",
+                type: "is-danger",
+                duration: 1000,
+              });
             } else {
               this.$buefy.notification.open({
-                message: "상품권 발행에 실패했습니다.",
+                message: "요청에 실패했습니다.",
                 type: "is-danger",
                 duration: 1000,
               });

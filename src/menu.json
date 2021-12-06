@@ -102,6 +102,15 @@
                 ]
             },
             {
+                "title": "상품권 발행 요청 승인",
+                "icon": "pen-nib",
+                "route": "log/request",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
                 "title": "상품권 발행 내역",
                 "icon": "pen-nib",
                 "route": "log/publish",

@@ -1,6 +1,8 @@
 <template>
   <div class="home">
-    <p class="title is-8">대량선물 요청 조회</p>
+    <p class="title is-8">
+      대량선물 요청 조회
+    </p>
     <p class="subtitle is-8">
       대량선물 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
     </p>
@@ -22,7 +24,9 @@
     <b-field label="ID로 검색">
       <b-input v-model="id" type="text"></b-input>
     </b-field>
-    <b-button type="is-primary" @click="findRequest"> 조회 </b-button>
+    <b-button type="is-primary" @click="findRequest">
+      조회
+    </b-button>
     <Table
       v-if="loaded"
       type="bulkreq"
@@ -36,7 +40,7 @@
         <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
       </template>
       <template v-slot:control="props">
-        <BulkReqControl :checked-rows="props.checkedRows" />
+        <BulkReqControl type="gift" :checked-rows="props.checkedRows" />
       </template>
     </Table>
     <table-loading v-else-if="loaded == false" />

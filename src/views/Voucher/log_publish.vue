@@ -4,7 +4,7 @@
     <p class="subtitle is-8">
       상품권 발행 기록을 조건과 함께 조회할 수 있습니다.
     </p>
-    <b-field label="요청 내역 날짜 범위 선택" grouped>
+    <b-field label="발행일시 범위 선택" grouped>
       <b-datepicker v-model="selectedStart" :mobile-native="false">
         <template v-slot:trigger>
           <b-button icon-left="calendar" type="is-primary" />
@@ -48,6 +48,7 @@ import Table from "@/components/Table";
 import TableLoading from "@/components/TableLoading.vue";
 import VoucherDetail from "@/components/Voucher/Detail.vue";
 import VoucherControl from "@/components/Voucher/Control.vue";
+import dateUtil from "@/js/dateUtil.js";
 
 export default {
   name: "Home",
@@ -79,6 +80,10 @@ export default {
         {
           field: "issuer",
           label: "발행인",
+        },
+        {
+          field: "receiver",
+          label: "수신인",
         },
         {
           field: "amount",
@@ -127,64 +132,37 @@ export default {
       this.page = value;
     },
     findVoucher() {
-      let data = {};
-      if (this.selectedStart != null && this.selectedEnd != null) {
-        // 날짜 범위 있음
-        if (this.id == "") {
-          // id가 비어 있으면
-          data = {
-            type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-          };
-        } else {
-          // 아니면
-          data = {
-            type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-            uid: this.id,
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        // 날짜 범위 없음
-        if (this.id == "") {
-          data = {
-            type: "null",
-          };
-        } else {
-          data = {
-            type: "uid",
-            uid: this.id,
-          };
-        }
-      }
-      console.log(data);
-      this.loaded = true;
+      if (this.selectedEnd != null)
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+
       this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/voucher/request/`)
+        .get(`${process.env.VUE_APP_API_URL}/voucher/filter`, {
+          params: {
+            dateFrom:
+              this.selectedStart != null
+                ? this.selectedStart.toISOString()
+                : undefined,
+            dateTo:
+              this.selectedEnd != null
+                ? this.selectedEnd.toISOString()
+                : undefined,
+            issuer: this.id || undefined,
+            amountMin: this.amountMin || undefined,
+            amountMax: this.amountMax || undefined,
+          },
+        })
         .then((requestRes) => {
           console.log(requestRes);
           if (requestRes.data.status) {
-            //this.data = requestRes.data.result;
-            this.data = [
-              {
-                id: "32021120142342343243334",
-                issuer: {
-                  uid: "chiwon0923",
-                  name: "송치원",
-                },
-                amount: 5000,
-                message: "우수 동아리 선정",
-                date: new Date(),
-                expire: new Date(),
-                exchanged: false,
-                item: {
-                  4: 5,
-                },
-              },
-            ];
+            this.data = requestRes.data.result;
             this.loaded = true;
+            if (this.selectedEnd != null)
+              this.selectedEnd = dateUtil.addTime(
+                this.selectedEnd,
+                -23,
+                -59,
+                -59
+              );
             this.$buefy.notification.open({
               message: "조회에 성공했습니다!",
               type: "is-primary",

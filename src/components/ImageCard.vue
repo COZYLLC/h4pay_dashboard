@@ -3,7 +3,7 @@
     <div class="card">
       <div class="card-image">
         <figure class="image is-4by3">
-          <img :src="img" alt="Placeholder image" />
+          <img :src="require('@/assets/notready.png')" alt="Placeholder image" />
         </figure>
       </div>
       <div class="card-content">

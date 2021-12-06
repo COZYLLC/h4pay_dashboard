@@ -1,13 +1,15 @@
 <template>
   <div class="App">
-    <section style="text-align: left; width: 45vw; margin: auto" id="form">
-      <p class="title" style="text-align: center">회원가입</p>
+    <section id="form" style="text-align: left; width: 45vw; margin: auto">
+      <p class="title" style="text-align: center">
+        회원가입
+      </p>
       <b-field label="이름" :type="isValid(nameState)" horizontal>
         <b-input v-model="form.name" type="text" />
       </b-field>
       <b-field label="사용자 유형" horizontal>
         <b-select v-model="form.role">
-          <option v-for="(option, i) in options" :value="option.value" :key="i">
+          <option v-for="(option, i) in options" :key="i" :value="option.value">
             {{ option.text }}
           </option>
         </b-select>
@@ -19,11 +21,11 @@
         <b-input v-model="form.uid" type="text" />
       </b-field>
       <b-field label="비밀번호" :type="isValid(pwState)" horizontal>
-        <b-input type="password" v-model="form.password" password-reveal>
+        <b-input v-model="form.password" type="password" password-reveal>
         </b-input>
       </b-field>
       <b-field label="비밀번호 재입력" :type="isValid(pw2State)" horizontal>
-        <b-input type="password" v-model="form.password2" password-reveal>
+        <b-input v-model="form.password2" type="password" password-reveal>
         </b-input>
       </b-field>
       <b-field label="이메일" :type="isValid(emailState)" horizontal>
@@ -33,24 +35,24 @@
         <b-input
           v-model="maskedTel"
           type="tel"
-          @keyup="getPhoneMask(form.tel)"
           maxlength="13"
+          @keyup="getPhoneMask(form.tel)"
         />
       </b-field>
       <b-field>
         <b-checkbox
           v-for="(agreement, idx) in agreements"
-          v-model="form.checks.selected[idx]"
-          @input="onCheck(idx)"
           :key="idx"
+          v-model="form.checks.selected[idx]"
           :state="checkState"
+          @input="onCheck(idx)"
         >
           {{ agreement.text }}
         </b-checkbox>
       </b-field>
-      <b-button type="submit" v-on:click="loginSubmit" class="is-primary"
-        >회원가입</b-button
-      >
+      <b-button type="submit" class="is-primary" @click="loginSubmit">
+        회원가입
+      </b-button>
     </section>
 
     <b-modal v-model="policyModalActive">
@@ -61,18 +63,17 @@
               v-for="(agreement, idx) in agreements"
               :key="idx"
               :label="agreement.text"
-              ><iframe
+            >
+              <iframe
                 :src="`https://h4pay.co.kr/law/${agreement.url}.html`"
                 style="width: 100%; height: 400px; border: none"
-              ></iframe
-            ></b-tab-item>
+              ></iframe>
+            </b-tab-item>
           </b-tabs>
         </div>
 
         <footer class="card-footer">
-          <a href="#" class="card-footer-item" @click="closeModal"
-            >동의합니다</a
-          >
+          <a href="#" class="card-footer-item" @click="closeModal">동의합니다</a>
         </footer>
       </div>
     </b-modal>
@@ -120,6 +121,61 @@ export default {
       },
       policyModalActive: false,
     };
+  },
+  computed: {
+    maskedTel: {
+      get() {
+        return this.form.tel;
+      },
+      set(newVal) {
+        this.form.tel = this.getMask(newVal);
+      },
+    },
+    checkState() {
+      let state = true;
+      for (let i = 0; i < this.form.checks.selected.length; i++) {
+        if (!this.form.checks.selected[i]) {
+          state = false;
+        }
+      }
+      return state;
+    },
+    telState() {
+      const telRegExp = /^\d{3}-\d{4}-\d{4}$/;
+      return telRegExp.test(this.form.tel);
+    },
+    emailState() {
+      const emailRegExp =
+        /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+      return emailRegExp.test(this.form.email);
+    },
+    nameState() {
+      const nameRegExp = /^[가-힣]{2,8}$/;
+      return nameRegExp.test(this.form.name);
+    },
+    roleState() {
+      return this.form.role != null;
+    },
+    idState() {
+      return this.form.uid != "" || this.form.uid.length > 6;
+    },
+    sIdState() {
+      const reg = /^\d{4}/;
+      return reg.test(this.form.studentid);
+    },
+    pwState() {
+      const pwRegExp =
+        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+      return pwRegExp.test(this.form.password);
+    },
+    pw2State() {
+      return (
+        this.form.password == this.form.password2 && this.form.password2 != null
+      );
+    },
+    codeState() {
+      return this.checkValidKey(this.form.role);
+    },
   },
   watch: {
     selected(newValue) {
@@ -278,68 +334,10 @@ export default {
       }
     },
   },
-  computed: {
-    maskedTel: {
-      get() {
-        return this.form.tel;
-      },
-      set(newVal) {
-        this.form.tel = this.getMask(newVal);
-      },
-    },
-    checkState() {
-      let state = true;
-      for (let i = 0; i < this.form.checks.selected.length; i++) {
-        if (!this.form.checks.selected[i]) {
-          state = false;
-        }
-      }
-      return state;
-    },
-    telState() {
-      const telRegExp = /^\d{3}-\d{4}-\d{4}$/;
-      return telRegExp.test(this.form.tel);
-    },
-    emailState() {
-      const emailRegExp =
-        /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-      return emailRegExp.test(this.form.email);
-    },
-    nameState() {
-      const nameRegExp = /^[가-힣]{2,8}$/;
-      return nameRegExp.test(this.form.name);
-    },
-    roleState() {
-      return this.form.role != null;
-    },
-    idState() {
-      return this.form.uid != "" || this.form.uid.length > 6;
-    },
-    sIdState() {
-      const reg = /^\d{4}/;
-      return reg.test(this.form.studentid);
-    },
-    pwState() {
-      const pwRegExp =
-        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-      return pwRegExp.test(this.form.password);
-    },
-    pw2State() {
-      return (
-        this.form.password == this.form.password2 && this.form.password2 != null
-      );
-    },
-    codeState() {
-      return this.checkValidKey(this.form.role);
-    },
-  },
 };
 </script>
 
 <style>
-.title {
-  color: white;
-}
 
 body {
   margin: 0;
@@ -360,4 +358,10 @@ body {
 .alert-danger p {
   color: red;
 }
+</style>
+<style scoped>
+.title {
+  color: white;
+}
+
 </style>

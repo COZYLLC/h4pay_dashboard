@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <p class="title is-8">대량발주 요청 조회</p>
+    <p class="title is-8">대량선물 요청 조회</p>
     <p class="subtitle is-8">
-      대량발주 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
+      대량선물 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수 있습니다.
     </p>
     <b-field label="요청 내역 날짜 범위 선택" grouped>
       <b-datepicker v-model="selectedStart" :mobile-native="false">
@@ -20,18 +20,25 @@
     </b-field>
 
     <b-field label="ID로 검색">
-      <b-input type="text" v-model="id"></b-input>
+      <b-input v-model="id" type="text"></b-input>
     </b-field>
-    <b-button @click="findRequest" type="is-primary">조회</b-button>
+    <b-button type="is-primary" @click="findRequest"> 조회 </b-button>
     <Table
       v-if="loaded"
       type="bulkreq"
       :products="products"
       :columns="columns"
       :data="data"
-      :detailKey="table.detailKey"
+      :detail-key="table.detailKey"
       :checkable="true"
-    />
+    >
+      <template v-slot:detail="props">
+        <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
+      </template>
+      <template v-slot:control="props">
+        <BulkReqControl :checked-rows="props.checkedRows" />
+      </template>
+    </Table>
     <table-loading v-else-if="loaded == false" />
   </div>
 </template>
@@ -40,11 +47,70 @@
 // @ is an alias to /src
 import Table from "@/components/Table";
 import TableLoading from "../../components/TableLoading.vue";
+import BulkReqDetail from "@/components/BulkReq/Detail";
+import BulkReqControl from "@/components/BulkReq/Control";
+
 export default {
   name: "Home",
   components: {
     Table,
     TableLoading,
+    BulkReqDetail,
+    BulkReqControl,
+  },
+  data() {
+    return {
+      selectedStart: null,
+      selectedEnd: null,
+      id: "",
+      loaded: null,
+      data: [],
+      products: [],
+      table: {
+        detailKey: "id",
+        page: 1,
+        checkedRows: [],
+      },
+      columns: [
+        {
+          field: "id",
+          label: "요청ID",
+          width: 1,
+        },
+        {
+          field: "senderUid",
+          label: "주문자 ID",
+        },
+        {
+          field: "date",
+          label: "요청 일시",
+        },
+        {
+          field: "product",
+          label: "요청 제품",
+        },
+        {
+          field: "qty",
+          label: "1인당 수량",
+        },
+        {
+          field: "approved",
+          label: "승인 여부",
+        },
+        {
+          field: "amount",
+          label: "결제 금액",
+        },
+      ],
+    };
+  },
+  computed: {
+    startString() {
+      return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
+    },
+    endString() {
+      return this.selectedEnd ? this.selectedEnd.toLocaleDateString() : "";
+    },
   },
   created() {
     this.$axios
@@ -115,60 +181,6 @@ export default {
           }
         });
     },
-  },
-  computed: {
-    startString() {
-      return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
-    },
-    endString() {
-      return this.selectedEnd ? this.selectedEnd.toLocaleDateString() : "";
-    },
-  },
-  data() {
-    return {
-      selectedStart: null,
-      selectedEnd: null,
-      id: "",
-      loaded: null,
-      data: [],
-      products: [],
-      table: {
-        detailKey: "id",
-        page: 1,
-        checkedRows: [],
-      },
-      columns: [
-        {
-          field: "id",
-          label: "요청ID",
-          width: 1,
-        },
-        {
-          field: "senderUid",
-          label: "주문자 ID",
-        },
-        {
-          field: "date",
-          label: "요청 일시",
-        },
-        {
-          field: "product",
-          label: "요청 제품",
-        },
-        {
-          field: "qty",
-          label: "1인당 수량",
-        },
-        {
-          field: "approved",
-          label: "승인 여부",
-        },
-        {
-          field: "amount",
-          label: "결제 금액",
-        },
-      ],
-    };
   },
 };
 </script>

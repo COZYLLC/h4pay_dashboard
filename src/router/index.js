@@ -12,9 +12,39 @@ import Login from "@/views/Login"
 import Register from "@/views/Register"
 import Success from '@/views/Success'
 
+//Voucher
+import VoucherBulk from "@/views/Voucher/Bulk.vue"
+import VoucherBulkWithoutApprove from "@/views/Voucher/BulkWithoutApprove.vue"
+import PublishLog from "@/views/Voucher/log_publish.vue"
+import VoucherRequest from "@/views/Voucher/BulkReq.vue"
+
 Vue.use(VueRouter);
 
+const voucherRoutes = [
+  {
+    path: "/voucher/bulk",
+    name: "VoucherBulk",
+    component: VoucherBulk
+  },
+  {
+    path: "/voucher/bulk/noapprove",
+    name: "VoucherBulkWithoutApprove",
+    component: VoucherBulkWithoutApprove
+  },
+  {
+    path: "/voucher/log/publish",
+    name: "PublishLog",
+    component: PublishLog,
+  },
+  {
+    path: "/voucher/log/request",
+    name: "VoucherRequest",
+    component: VoucherRequest
+  }
+]
+
 const routes = [
+  ...voucherRoutes,
   {
     path: "/",
     name: "Home",

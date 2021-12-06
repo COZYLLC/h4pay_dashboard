@@ -10,9 +10,16 @@
       :products="products"
       :columns="columns"
       :data="products"
-      :detailKey="table.detailKey"
+      :detail-key="table.detailKey"
       :checkable="true"
-    />
+    >
+      <template v-slot:detail="row">
+        <ProductDetail :product="row" />
+      </template>
+      <template v-slot:control="props">
+        <ProductControl :checked-rows="props.checkedRows" />
+      </template>
+    </Table>
     <table-loading v-else />
   </div>
 </template>
@@ -21,21 +28,14 @@
 // @ is an alias to /src
 import Table from "@/components/Table";
 import TableLoading from "@/components/TableLoading.vue";
+import ProductDetail from "@/components/Product/Detail.vue";
+import ProductControl from "@/components/Product/Control.vue";
 export default {
   name: "Home",
   components: {
     Table,
     TableLoading,
-  },
-  created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          this.loaded = true;
-        }
-      });
+    ProductControl,
   },
   data() {
     return {
@@ -68,6 +68,16 @@ export default {
         },
       ],
     };
+  },
+  created() {
+    this.$axios
+      .get(`${process.env.VUE_APP_API_URL}/product`)
+      .then((productRes) => {
+        if (productRes.data.status) {
+          this.products = productRes.data.list;
+          this.loaded = true;
+        }
+      });
   },
 };
 </script>

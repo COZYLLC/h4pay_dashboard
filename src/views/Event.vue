@@ -8,55 +8,31 @@
       :products="products"
       :columns="columns"
       :data="data"
-      :detailKey="table.detailKey"
+      :detail-key="table.detailKey"
       :checkable="false"
       :page="table.page"
-    />
+    >
+      <template v-slot:detail="props">
+        <EventDetail :users="props.row.uid" />
+      </template>
+      <template v-slot:control="props">
+        <EventControl :checked-rows="props.checkedRows" />
+      </template>
+    </Table>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import Table from "@/components/Table";
+import EventDetail from "@/components/Event/Detail.vue";
+import EventControl from "@/components/Event/Control.vue";
 export default {
   name: "Home",
   components: {
     Table,
-  },
-  created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          this.lookup();
-        }
-      });
-    if (this.$route.query.page == undefined) {
-      if (this.$route.query.orderId) {
-        this.$router.replace({ query: { page: 1 } });
-      }
-    } else {
-      this.page = parseInt(this.$route.query.page);
-    }
-    let idx = this.data.findIndex(
-      (element) => element.orderId == "1202109261632631132259000"
-    );
-    this.checkedRows[0] = this.data[idx];
-    this.page = Math.ceil(idx / 10);
-  },
-  methods: {
-    lookup() {
-      this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/event/`)
-        .then((eventRes) => {
-          console.log(eventRes);
-          if (eventRes.data.result != null) {
-            this.data = eventRes.data.result;
-            this.loaded = true;
-          }
-        });
-    },
+    EventDetail,
+    EventControl,
   },
   data() {
     return {
@@ -98,6 +74,41 @@ export default {
         },
       ],
     };
+  },
+  created() {
+    this.$axios
+      .get(`${process.env.VUE_APP_API_URL}/product`)
+      .then((productRes) => {
+        if (productRes.data.status) {
+          this.products = productRes.data.list;
+          this.lookup();
+        }
+      });
+    if (this.$route.query.page == undefined) {
+      if (this.$route.query.orderId) {
+        this.$router.replace({ query: { page: 1 } });
+      }
+    } else {
+      this.page = parseInt(this.$route.query.page);
+    }
+    let idx = this.data.findIndex(
+      (element) => element.orderId == "1202109261632631132259000"
+    );
+    this.checkedRows[0] = this.data[idx];
+    this.page = Math.ceil(idx / 10);
+  },
+  methods: {
+    lookup() {
+      this.$axios
+        .get(`${process.env.VUE_APP_API_URL}/event/`)
+        .then((eventRes) => {
+          console.log(eventRes);
+          if (eventRes.data.result != null) {
+            this.data = eventRes.data.result;
+            this.loaded = true;
+          }
+        });
+    },
   },
 };
 </script>

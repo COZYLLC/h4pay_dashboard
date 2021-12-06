@@ -39,10 +39,10 @@ export default {
           .then((res) => {
             console.log(res);
             if (res.data.status) {
-              alert("대량발주 승인에 성공했습니다!");
+              alert("대량선물 승인에 성공했습니다!");
               this.$router.push("/");
             } else {
-              alert("대량발주 승인에 실패했습니다..");
+              alert("대량선물 승인에 실패했습니다..");
               this.$router.push("/");
             }
           });

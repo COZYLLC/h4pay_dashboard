@@ -23,8 +23,8 @@
         <div class="column">
           <b-field label="발송자 ID">
             <b-input
-              type="text"
               v-model="uidfrom"
+              type="text"
               :disabled="isMassiveGift"
             ></b-input>
           </b-field>
@@ -32,17 +32,17 @@
         <div class="column">
           <b-field label="수신자 ID">
             <b-input
-              type="text"
               v-model="uidto"
+              type="text"
               :disabled="isMassiveGift"
             ></b-input>
           </b-field>
         </div>
       </div>
     </b-field>
-    <b-field label="대량발주 옵션">
+    <b-field label="대량선물 옵션">
       <b-radio v-model="isMassiveGift" name="name" :native-value="true">
-        대량발주만 조회
+        대량선물만 조회
       </b-radio>
       <b-radio v-model="isMassiveGift" name="name" :native-value="false">
         일반 선물만 조회
@@ -51,16 +51,23 @@
         모두 조회
       </b-radio>
     </b-field>
-    <b-button @click="findGift" type="is-primary">조회</b-button>
+    <b-button type="is-primary" @click="findGift"> 조회 </b-button>
     <Table
       v-if="loaded"
       type="gift"
       :products="products"
       :columns="columns"
       :data="data"
-      :detailKey="table.detailKey"
+      :detail-key="table.detailKey"
       :checkable="true"
-    />
+    >
+      <template v-slot:detail="props">
+        <PurchaseDetail :item="props.row.item" :products="products" />
+      </template>
+      <template v-slot:control="props">
+        <PurchaseControl type="gift" :checked-rows="props.checkedRows" />
+      </template>
+    </Table>
     <table-loading v-else-if="loaded == false" />
   </div>
 </template>
@@ -69,11 +76,68 @@
 import dateUtil from "@/js/dateUtil.js";
 import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
+import PurchaseDetail from "@/components/Purchase/Detail.vue";
+import PurchaseControl from "@/components/Purchase/Control.vue";
+
 export default {
-  name: "Home",
   components: {
     Table,
     TableLoading,
+    PurchaseDetail,
+    PurchaseControl,
+  },
+  data() {
+    return {
+      isMassiveGift: false,
+      loaded: null,
+      selectedStart: null,
+      selectedEnd: null,
+      uidfrom: null,
+      uidto: null,
+      data: [],
+      products: [],
+      table: {
+        detailKey: "orderId",
+      },
+      columns: [
+        {
+          field: "orderId",
+          label: "주문번호",
+        },
+        {
+          field: "uidfrom",
+          label: "발송인 ID",
+        },
+        {
+          field: "uidto",
+          label: "수신인 ID",
+        },
+        {
+          field: "amount",
+          label: "결제금액",
+        },
+        {
+          field: "date",
+          label: "주문 일시",
+        },
+        {
+          field: "expire",
+          label: "교환 만료 일시",
+        },
+        {
+          field: "exchanged",
+          label: "교환 여부",
+        },
+      ],
+    };
+  },
+  computed: {
+    startString() {
+      return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
+    },
+    endString() {
+      return this.selectedEnd ? this.selectedEnd.toLocaleDateString() : "";
+    },
   },
   created() {
     this.$axios
@@ -157,59 +221,6 @@ export default {
           }
         });
     },
-  },
-  computed: {
-    startString() {
-      return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
-    },
-    endString() {
-      return this.selectedEnd ? this.selectedEnd.toLocaleDateString() : "";
-    },
-  },
-  data() {
-    return {
-      isMassiveGift: false,
-      loaded: null,
-      selectedStart: null,
-      selectedEnd: null,
-      uidfrom: null,
-      uidto: null,
-      data: [],
-      products: [],
-      table: {
-        detailKey: "orderId",
-      },
-      columns: [
-        {
-          field: "orderId",
-          label: "주문번호",
-        },
-        {
-          field: "uidfrom",
-          label: "발송인 ID",
-        },
-        {
-          field: "uidto",
-          label: "수신인 ID",
-        },
-        {
-          field: "amount",
-          label: "결제금액",
-        },
-        {
-          field: "date",
-          label: "주문 일시",
-        },
-        {
-          field: "expire",
-          label: "교환 만료 일시",
-        },
-        {
-          field: "exchanged",
-          label: "교환 여부",
-        },
-      ],
-    };
   },
 };
 </script>

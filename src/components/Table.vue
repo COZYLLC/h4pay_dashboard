@@ -1,8 +1,8 @@
 <template>
   <section>
     <b-table
-      :data="data"
       ref="table"
+      :data="data"
       paginated
       per-page="10"
       detailed
@@ -13,7 +13,6 @@
       checkbox-position="left"
       :checked-rows.sync="checkedRows"
       :header-checkable="false"
-      @page-change="onPageChange"
       :current-page.sync="page"
       :is-row-checkable="
         (row) =>
@@ -26,111 +25,69 @@
       aria-previous-label="Previous page"
       aria-page-label="Page"
       aria-current-label="Current page"
+      @page-change="onPageChange"
     >
       <b-table-column
         v-for="(column, idx) in columns"
         :key="idx"
+        v-slot="props"
         :field="column.field"
         :label="column.label"
         :width="column.field == 'orderId' ? 10 : null"
         centered
-        v-slot="props"
       >
-        <template
-          v-if="
-            column.field == 'date' ||
-            column.field == 'expire' ||
-            column.field == 'start' ||
-            column.field == 'end'
-          "
-        >
+        <template v-if="isDateField(column.field)">
+          <!-- 날짜필드 -->
           {{ new Date(props.row[column.field]).toLocaleDateString() }}
         </template>
         <template v-else-if="column.field == 'product'">
+          <!-- 대량선물에서 제품 필드 -->
           {{
             products.filter(
               (product) => product.id == props.row[column.field]
             )[0].productName
           }}
         </template>
-        <template
-          v-else-if="
-            column.field == 'exchanged' ||
-            column.field == 'soldout' ||
-            column.field == 'approved'
-          "
-        >
+        <template v-else-if="column.field == 'issuer'">
+          {{ props.row.issuer.uid }}
+        </template>
+        <template v-else-if="typeof props.row[column.field] == 'boolean'">
+          <!-- 교환여부 등 불린 필드 -->
           <span v-if="props.row[column.field] == true" class="tag is-danger">
             O
           </span>
           <span v-else class="tag is-primary"> X </span>
         </template>
-        <template v-else>{{ props.row[column.field] }}</template>
+        <template v-else>
+          <!-- 그 외 모든 필드 -->
+          {{ props.row[column.field] }}
+        </template>
       </b-table-column>
 
       <template #detail="props">
         <article class="media">
           <div class="columns">
-            <PurchaseDetail
-              v-if="type == 'order' || type == 'gift'"
-              :item="props.row.item"
-              :products="products"
-            />
-            <EventDetail v-if="type == 'event'" :users="props.row.uid" />
-            <ProductDetail v-if="type == 'product'" :product="props.row" />
-            <BulkReqDetail
-              v-if="type == 'bulkreq'"
-              :names="props.row.names"
-              :targets="props.row.targets"
-            />
+            <slot name="detail" :row="props.row"></slot>
           </div>
         </article>
       </template>
       <template #footer>
-        <EventControl v-if="type == 'event'" :checkedRows="checkedRows" />
-        <PurchaseControl
-          v-else-if="type == 'order' || type == 'gift'"
-          :type="type"
-          :checkedRows="checkedRows"
-        />
-        <ProductControl
-          v-else-if="type == 'product'"
-          :checkedRows="checkedRows"
-        />
-        <BulkReqControl
-          v-else-if="type == 'bulkreq'"
-          :checkedRows="checkedRows"
-        />
+        <slot name="control" :checkedRows="checkedRows"></slot>
       </template>
     </b-table>
   </section>
 </template>
 
 <script>
-import PurchaseDetail from "@/components/Purchase/Detail";
-import PurchaseControl from "@/components/Purchase/Control";
-import EventDetail from "@/components/Event/Detail";
-import EventControl from "@/components/Event/Control";
-import ProductDetail from "@/components/Product/Detail";
-import ProductControl from "@/components/Product/Control";
-import BulkReqDetail from "@/components/BulkReq/Detail";
-import BulkReqControl from "@/components/BulkReq/Control";
-
 export default {
-  components: {
-    PurchaseDetail,
-    PurchaseControl,
-    EventDetail,
-    EventControl,
-    ProductDetail,
-    ProductControl,
-    BulkReqDetail,
-    BulkReqControl,
-  },
-  methods: {
-    onPageChange(page) {
-      this.$router.replace({ query: { page: page } });
-    },
+  props: ["type", "detailKey", "products", "columns", "data", "checkable"],
+
+  data() {
+    return {
+      showDetailIcon: true,
+      checkedRows: [],
+      page: 1,
+    };
   },
   created() {
     if (this.$route.query.page == undefined) {
@@ -151,14 +108,18 @@ export default {
       this.page = parseInt(this.$route.query.page);
     }
   },
-  props: ["type", "detailKey", "products", "columns", "data", "checkable"],
-
-  data() {
-    return {
-      showDetailIcon: true,
-      checkedRows: [],
-      page: 1,
-    };
+  methods: {
+    onPageChange(page) {
+      this.$router.replace({ query: { page: page } });
+    },
+    isDateField(field) {
+      return (
+        field == "date" ||
+        field == "expire" ||
+        field == "start" ||
+        field == "end"
+      );
+    },
   },
 };
 </script>

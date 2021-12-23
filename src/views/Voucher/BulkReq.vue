@@ -1,8 +1,6 @@
 <template>
   <div class="home">
-    <p class="title is-8">
-      상품권 선물 요청 조회
-    </p>
+    <p class="title is-8">상품권 선물 요청 조회</p>
     <p class="subtitle is-8">
       상품권 선물 요청 내역을 날짜 범위, ID를 조건으로 이용해 조회할 수
       있습니다.
@@ -30,7 +28,7 @@
       <b-input v-model="id" type="text" expanded></b-input>
     </b-field>
     <b-button type="is-primary" @click="findRequest">
-      조회
+      {{ notInputed ? "전체 조회" : "조회" }}
     </b-button>
     <Table
       v-if="loaded"
@@ -110,6 +108,15 @@ export default {
     };
   },
   computed: {
+    notInputed() {
+      return (
+        this.selectedStart == null &&
+        this.selectedEnd == null &&
+        this.amountMin == null &&
+        this.amountMax == null &&
+        this.id == ""
+      );
+    },
     startString() {
       return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
     },

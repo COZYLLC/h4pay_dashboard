@@ -4,10 +4,13 @@
       >지출품의서 다운로드</b-button
     > -->
     <div v-if="!checkedRows[0].approved">
-      <b-button class="is-primary" style="margin-left: 10px" @click="payment">
+      <b-button class="is-success" style="margin-left: 10px" @click="payment">
         승인
       </b-button>
     </div>
+    <b-button class="is-danger" style="margin-left: 10px" @click="remove">
+      거부
+    </b-button>
   </div>
 </template>
 
@@ -37,16 +40,23 @@ export default {
       );
     },
     async payment() {
-      const request = this.checkedRows[0]
+      const request = this.checkedRows[0];
       if (this.type != "voucher" && this.type != "gift") {
         this.$toast.open({
           message: "대량선물 승인에 실패했습니다.",
-          type:"is-danger"
-        })
-        return
+          type: "is-danger",
+        });
+        return;
       }
-      const orderId = (this.type == "voucher" ? 3 : this.type == "gift" ? 2 : null) + orderIdgen.orderIdgen();
-      const amount = this.type == "gift" ? request.amount : this.type == "voucher" ? request.amount * request.targets.length : null;
+      const orderId =
+        (this.type == "voucher" ? 3 : this.type == "gift" ? 2 : null) +
+        orderIdgen.orderIdgen();
+      const amount =
+        this.type == "gift"
+          ? request.amount
+          : this.type == "voucher"
+          ? request.amount * request.targets.length
+          : null;
       this.saveToLocalStorage(orderId, amount);
       const tossPayments = await loadTossPayments(
         process.env.VUE_APP_TOSS_CLIENTKEY
@@ -65,6 +75,7 @@ export default {
           console.log(error);
         });
     },
+    remove() {},
   },
 };
 </script>

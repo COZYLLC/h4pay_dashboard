@@ -22,7 +22,9 @@
     <b-field label="ID로 검색">
       <b-input v-model="id" type="text"></b-input>
     </b-field>
-    <b-button type="is-primary" @click="findOrder"> 조회 </b-button>
+    <b-button type="is-primary" @click="findOrder">
+      {{ notInputed ? "전체 조회" : "조회" }}
+    </b-button>
     <Table
       v-if="loaded"
       type="order"
@@ -100,6 +102,11 @@ export default {
     };
   },
   computed: {
+    notInputed() {
+      return (
+        this.selectedStart == null && this.selectedEnd == null && this.id == ""
+      );
+    },
     startString() {
       return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
     },

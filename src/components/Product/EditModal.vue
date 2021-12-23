@@ -2,7 +2,9 @@
   <form action="">
     <div class="modal-card" style="width: auto">
       <header class="modal-card-head">
-        <p class="modal-card-title">{{ title }}</p>
+        <p class="modal-card-title">
+          {{ title }}
+        </p>
 
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
@@ -12,6 +14,9 @@
         </p>
         <b-field label="제품명">
           <b-input v-model="product.productName" />
+        </b-field>
+        <b-field label="바코드 정보">
+          <b-input v-model="product.barcode" maxlength="13" />
         </b-field>
         <b-field label="가격">
           <b-input v-model="product.price" type="number" />
@@ -47,29 +52,30 @@
                 :src="imgSrc"
               />
             </div>
-            <div id="cancel" v-if="imgSrc != null">
-              <b-button class="is-danger" @click="deleteImage"
-                >사진 제거</b-button
-              >
+            <div v-if="imgSrc != null" id="cancel">
+              <b-button class="is-danger" @click="deleteImage">
+                사진 제거
+              </b-button>
             </div>
           </section>
         </div>
 
         <b-field label="품절 여부">
           <b-switch
-            :passive-type="product.soldout ? 'is-danger' : 'is-primary'"
             v-model="product.soldout"
+            :passive-type="product.soldout ? 'is-danger' : 'is-primary'"
             :type="product.soldout ? 'is-danger' : 'is-primary'"
-            >{{ product.soldout ? "품절" : "재고 보유중" }}</b-switch
           >
+            {{ product.soldout ? "품절" : "재고 보유중" }}
+          </b-switch>
         </b-field>
       </section>
       <footer class="modal-card-foot">
         <b-button label="닫기" @click="$emit('close')" />
         <b-button
           :label="type == 'add' ? '추가' : '변경'"
-          @click="submit"
           type="is-primary"
+          @click="submit"
         />
       </footer>
     </div>
@@ -87,12 +93,6 @@ export default {
     VueCropper,
   },
   props: ["email", "password", "canCancel", "title", "type", "productToModify"],
-  created() {
-    //this.image = this.$refs.image;
-    if (this.type == "modify") {
-      this.product = this.productToModify;
-    }
-  },
   data() {
     return {
       selectedFile: null,
@@ -100,6 +100,7 @@ export default {
       product: {
         id: null,
         productName: null,
+        barcode: null,
         price: null,
         desc: null,
         img: "",
@@ -107,6 +108,12 @@ export default {
       },
       compkey: 0,
     };
+  },
+  created() {
+    //this.image = this.$refs.image;
+    if (this.type == "modify") {
+      this.product = this.productToModify;
+    }
   },
   methods: {
     deleteImage() {
@@ -139,6 +146,7 @@ export default {
           );
           formData.append("file", file);
           formData.append("productName", this.product.productName);
+          formData.append("barcode", this.product.barcode);
           formData.append("price", this.product.price);
           formData.append("desc", this.product.desc);
           formData.append("soldout", this.product.soldout);

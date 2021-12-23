@@ -51,7 +51,9 @@
         모두 조회
       </b-radio>
     </b-field>
-    <b-button type="is-primary" @click="findGift"> 조회 </b-button>
+    <b-button type="is-primary" @click="findGift">
+      {{ notInputed ? "전체 조회" : "조회" }}
+    </b-button>
     <Table
       v-if="loaded"
       type="gift"
@@ -132,6 +134,14 @@ export default {
     };
   },
   computed: {
+    notInputed() {
+      return (
+        this.selectedStart == null &&
+        this.selectedEnd == null &&
+        this.uidfrom == null &&
+        this.uidto == null
+      );
+    },
     startString() {
       return this.selectedStart ? this.selectedStart.toLocaleDateString() : "";
     },

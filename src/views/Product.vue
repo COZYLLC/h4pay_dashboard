@@ -35,6 +35,7 @@ export default {
   components: {
     Table,
     TableLoading,
+    ProductDetail,
     ProductControl,
   },
   data() {

@@ -72,10 +72,10 @@ export default {
   },
   created() {
     this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
+      .get(`${process.env.VUE_APP_API_URL}/product/filter?withStored=0`)
       .then((productRes) => {
         if (productRes.data.status) {
-          this.products = productRes.data.list;
+          this.products = productRes.data.result;
           this.loaded = true;
         }
       });

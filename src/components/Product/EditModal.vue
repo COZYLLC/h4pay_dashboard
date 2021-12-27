@@ -110,7 +110,6 @@ export default {
     };
   },
   created() {
-    //this.image = this.$refs.image;
     if (this.type == "modify") {
       this.product = this.productToModify;
     }

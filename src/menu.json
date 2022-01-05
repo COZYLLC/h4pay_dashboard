@@ -39,19 +39,8 @@
             },
             {
                 "title": "대량선물 요청",
-                "icon": "paper-plane",
+                "icon": "thumbs-up",
                 "route": "bulk",
-                "role": [
-                    "SA",
-                    "A",
-                    "T",
-                    "AT"
-                ]
-            },
-            {
-                "title": "대량선물 조회 및 승인",
-                "icon": "scroll",
-                "route": "bulk/lookup",
                 "role": [
                     "SA",
                     "A",
@@ -65,6 +54,17 @@
                 "route": "bulk/noapprove",
                 "role": [
                     "SA",
+                    "AT"
+                ]
+            },
+            {
+                "title": "대량선물 조회 및 승인",
+                "icon": "clipboard-list",
+                "route": "bulk/lookup",
+                "role": [
+                    "SA",
+                    "A",
+                    "T",
                     "AT"
                 ]
             }
@@ -84,7 +84,7 @@
         "children": [
             {
                 "title": "상품권 대량선물",
-                "icon": "paper-plane",
+                "icon": "thumbs-up",
                 "route": "bulk",
                 "role": [
                     "SA",
@@ -112,7 +112,7 @@
             },
             {
                 "title": "상품권 발행 내역",
-                "icon": "pen-nib",
+                "icon": "clipboard-list",
                 "route": "log/publish",
                 "role": [
                     "SA",

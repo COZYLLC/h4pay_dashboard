@@ -35,7 +35,7 @@
       :checkable="true"
     >
       <template v-slot:detail="props">
-        <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
+        <BulkReqDetail :targets="props.row.targets" :products="products" />
       </template>
       <template v-slot:control="props">
         <BulkReqControl type="gift" :checked-rows="props.checkedRows" />
@@ -51,6 +51,7 @@ import Table from "@/components/Table";
 import TableLoading from "../../components/TableLoading.vue";
 import BulkReqDetail from "@/components/BulkReq/Detail";
 import BulkReqControl from "@/components/BulkReq/Control";
+import dateUtil from "@/js/dateUtil.js";
 
 export default {
   name: "Home",
@@ -86,14 +87,6 @@ export default {
         {
           field: "date",
           label: "요청 일시",
-        },
-        {
-          field: "product",
-          label: "요청 제품",
-        },
-        {
-          field: "qty",
-          label: "1인당 수량",
         },
         {
           field: "approved",
@@ -140,41 +133,26 @@ export default {
     },
     findRequest() {
       let data = {};
-      if (this.selectedStart != null && this.selectedEnd != null) {
-        // 날짜 범위 있음
-        if (this.id == "") {
-          // id가 비어 있으면
-          data = {
-            type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-          };
-        } else {
-          // 아니면
-          data = {
-            type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-            uid: this.id,
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        // 날짜 범위 없음
-        if (this.id == "") {
-          data = {
-            type: "null",
-          };
-        } else {
-          data = {
-            type: "uid",
-            uid: this.id,
-          };
-        }
-      }
       console.log(data);
-      this.loaded = true;
+      if (this.selectedEnd != null) {
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+      }
       this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/bulk/request/`)
+        .get(`${process.env.VUE_APP_API_URL}/bulk/request/filter`, {
+          params: {
+            dateFrom:
+              this.selectedStart != null
+                ? this.selectedStart.toISOString()
+                : undefined,
+            dateTo:
+              this.selectedEnd != null
+                ? this.selectedEnd.toISOString()
+                : undefined,
+            issuer: this.id || undefined,
+            amountMin: this.amountMin || undefined,
+            amountMax: this.amountMax || undefined,
+          },
+        })
         .then((requestRes) => {
           console.log(requestRes);
           if (requestRes.data.status) {

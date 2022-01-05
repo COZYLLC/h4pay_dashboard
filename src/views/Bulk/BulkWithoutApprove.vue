@@ -1,5 +1,5 @@
 <template>
-  <BulkForm @submit="submit" />
+  <BulkForm @submit="submit" @submitWithExcel="submitWithExcel" />
 </template>
 <script>
 import BulkForm from "./BulkForm.vue";
@@ -9,6 +9,24 @@ export default {
   },
   methods: {
     submit(data) {
+      console.log("non-excel");
+
+      this.$axios
+        .post(`${process.env.VUE_APP_API_URL}/bulk/request/`, data)
+        .then((res) => {
+          if (res.status == 200 && res.data.status) {
+            this.approveDirectly(res.data.id);
+          } else {
+            alert(res.data.message);
+            this.$router.push("/gift");
+          }
+        })
+        .catch((err) => {
+          alert(`오류가 발생했습니다: ${err.message}`);
+          this.$router.push("/gift");
+        });
+    },
+    submitWithExcel(data) {
       if (
         typeof data.get("excel") == "function" &&
         data.get("excel") == undefined

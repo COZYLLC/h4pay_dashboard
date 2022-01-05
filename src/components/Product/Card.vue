@@ -7,7 +7,24 @@
         </figure>
       </div>
       <div class="media-content">
-        {{ product.productName }}<br />{{ qty }}개
+        <p class="title is-4">
+          {{ product.productName }}
+        </p>
+        <b-button
+          v-if="controlable"
+          class="is-danger"
+          rounded
+          icon-right="minus"
+          @click="$emit('decrease', product.id)"
+        />
+        <p class="qty">{{ qty }}개</p>
+        <b-button
+          v-if="controlable"
+          class="is-success"
+          rounded
+          icon-right="plus"
+          @click="$emit('increase', product.id)"
+        />
       </div>
     </article>
   </div>
@@ -15,6 +32,23 @@
 
 <script>
 export default {
-  props: ["product", "qty"],
+  props: {
+    product: { type: Object, default: () => [] },
+    qty: { type: Number, default: 0 },
+    controlable: { type: Boolean, default: false },
+  },
 };
 </script>
+
+<style scoped>
+button.button.is-rounded {
+  padding: 0 1em !important;
+}
+</style>
+<style>
+.qty {
+  display: inline;
+  margin: 0 0.5em;
+  font-size: 1.5em;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <BulkForm @submit="submit" />
+  <BulkForm @submit="submit" @submitWithExcel="submitExcel" />
 </template>
 <script>
 import BulkForm from "./BulkForm.vue";
@@ -9,11 +9,30 @@ export default {
   },
   methods: {
     submit(data) {
+      console.log("non-excel");
+      this.$axios
+        .post(`${process.env.VUE_APP_API_URL}/bulk/request/`, data)
+        .then((res) => {
+          if (res.status == 200 && res.data.status) {
+            alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
+            this.$router.push("/gift");
+          } else {
+            alert(res.data.message);
+            this.$router.push("/gift");
+          }
+        })
+        .catch((err) => {
+          alert(`오류가 발생했습니다: ${err.message}`);
+          this.$router.push("/gift");
+        });
+    },
+    submitExcel(data) {
+      console.log("excel");
       if (typeof data.get("excel") == "function") {
         alert("파일을 업로드해주세요!");
       } else {
         this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/bulk/request`, data, {
+          .post(`${process.env.VUE_APP_API_URL}/bulk/request/excel`, data, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -29,6 +48,7 @@ export default {
             }
           })
           .catch((error) => {
+            console.log(error);
             alert(error.status);
             this.$router.push("/gift");
           });

@@ -40,10 +40,7 @@
       :checkable="true"
     >
       <template v-slot:detail="props">
-        <BulkReqDetail
-          :names="getSpecificValuesInTargets(props.row.targets, 'name')"
-          :targets="getSpecificValuesInTargets(props.row.targets, 'tel')"
-        />
+        <BulkReqDetail :targets="props.row.targets" />
       </template>
       <template v-slot:control="props">
         <BulkReqControl type="voucher" :checked-rows="props.checkedRows" />

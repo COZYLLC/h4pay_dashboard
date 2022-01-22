@@ -52,6 +52,8 @@ import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
 import PurchaseDetail from "@/components/Purchase/Detail.vue";
 import PurchaseControl from "@/components/Purchase/Control.vue";
+import { getProducts } from "../networking/product";
+import { getOrdersWithFilter } from "../networking/order";
 export default {
   components: {
     Table,
@@ -115,16 +117,14 @@ export default {
     },
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          if (this.$route.query.orderId != null) {
-            this.findOrder();
-          }
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        if (this.$route.query.orderId != null) {
+          this.findOrder();
         }
-      });
+      }
+    });
   },
   methods: {
     setCheckedRows(value) {
@@ -170,20 +170,18 @@ export default {
         }
       }
       console.log(data);
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/orders/filter`, data)
-        .then((orderRes) => {
-          console.log(orderRes);
-          if (orderRes.data.status) {
-            this.data = orderRes.data.result.reverse();
-            this.loaded = true;
-            this.$buefy.notification.open({
-              message: "조회에 성공했습니다!",
-              type: "is-primary",
-              duration: 1000,
-            });
-          }
-        });
+      getOrdersWithFilter(data).then((orderRes) => {
+        console.log(orderRes);
+        if (orderRes.status) {
+          this.data = orderRes.result.reverse();
+          this.loaded = true;
+          this.$buefy.notification.open({
+            message: "조회에 성공했습니다!",
+            type: "is-primary",
+            duration: 1000,
+          });
+        }
+      });
     },
   },
 };

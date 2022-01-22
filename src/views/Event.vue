@@ -27,6 +27,8 @@
 import Table from "@/components/Table";
 import EventDetail from "@/components/Event/Detail.vue";
 import EventControl from "@/components/Event/Control.vue";
+import { getProducts } from "../networking/product";
+import { getEvents } from "../networking/event";
 export default {
   name: "Home",
   components: {
@@ -76,38 +78,33 @@ export default {
     };
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          this.lookup();
-        }
-      });
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        this.lookup();
+      }
+    });
     if (this.$route.query.page == undefined) {
-      if (this.$route.query.orderId) {
-        this.$router.replace({ query: { page: 1 } });
+      if (this.$route.query.orderId != undefined) {
+        let idx = this.data.findIndex(
+          (element) => element.orderId == this.$route.query.orderId
+        );
+        this.checkedRows[0] = this.data[idx];
+        this.page = Math.ceil(idx / 10);
       }
     } else {
       this.page = parseInt(this.$route.query.page);
     }
-    let idx = this.data.findIndex(
-      (element) => element.orderId == "1202109261632631132259000"
-    );
-    this.checkedRows[0] = this.data[idx];
-    this.page = Math.ceil(idx / 10);
   },
   methods: {
     lookup() {
-      this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/event/`)
-        .then((eventRes) => {
-          console.log(eventRes);
-          if (eventRes.data.result != null) {
-            this.data = eventRes.data.result;
-            this.loaded = true;
-          }
-        });
+      getEvents().then((eventRes) => {
+        console.log(eventRes);
+        if (eventRes.result != null) {
+          this.data = eventRes.result;
+          this.loaded = true;
+        }
+      });
     },
   },
 };

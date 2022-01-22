@@ -80,6 +80,8 @@ import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
 import PurchaseDetail from "@/components/Purchase/Detail.vue";
 import PurchaseControl from "@/components/Purchase/Control.vue";
+import { getProducts } from "../networking/product";
+import { getGifts } from "../networking/gift";
 
 export default {
   components: {
@@ -150,16 +152,14 @@ export default {
     },
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          if (this.$route.query.orderId != null) {
-            this.findGift();
-          }
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        if (this.$route.query.orderId != null) {
+          this.findGift();
         }
-      });
+      }
+    });
   },
   methods: {
     findGift() {
@@ -216,20 +216,18 @@ export default {
         }
       }
       console.log(data);
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/gift/filter`, data)
-        .then((giftRes) => {
-          if (giftRes.data.status) {
-            this.data = giftRes.data.result;
-            console.log(this.isMassiveGift);
-            if (this.isMassiveGift == false) {
-              this.data = this.data
-                .filter((gift) => gift.uidfrom != "massiveGift")
-                .reverse();
-            }
-            this.loaded = true;
+      getGifts(data).then((giftRes) => {
+        if (giftRes.status) {
+          this.data = giftRes.result;
+          console.log(this.isMassiveGift);
+          if (this.isMassiveGift == false) {
+            this.data = this.data
+              .filter((gift) => gift.uidfrom != "massiveGift")
+              .reverse();
           }
-        });
+          this.loaded = true;
+        }
+      });
     },
   },
 };

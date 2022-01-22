@@ -53,6 +53,7 @@
 
 <script>
 import ProductSelector from "@/components/Product/Selector.vue";
+import { getVisibleProducts } from "../../../networking/product";
 export default {
   components: {
     ProductSelector,
@@ -82,17 +83,16 @@ export default {
       this.targets.push({ id: "", name: "", item: {} });
     },
     fetchProduct() {
-      this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/product/filter?withStored=0`)
+      getVisibleProducts()
         .then((res) => {
           if (res != undefined) {
-            res.data.result.forEach((item) => {
+            res.result.forEach((item) => {
               this.productsToSelect.push({
                 value: item.id,
                 text: item.productName,
               });
             });
-            this.products = res.data.result;
+            this.products = res.result;
           }
         })
         .catch((error) => {

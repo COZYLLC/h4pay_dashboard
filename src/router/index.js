@@ -11,6 +11,7 @@ import Product from '@/views/Product'
 import Login from "@/views/Login"
 import Register from "@/views/Register"
 import Success from '@/views/Success'
+import Admin from "@/views/Admin"
 
 //Voucher
 import VoucherBulk from "@/views/Voucher/Bulk.vue"
@@ -108,6 +109,11 @@ const routes = [
     meta: {
       hideNavigation: true
     }
+  },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: Admin,
   }
 ];
 

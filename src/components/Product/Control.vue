@@ -58,6 +58,7 @@
 
 <script>
 import EditModal from "@/components/Product/EditModal";
+import { removeProduct } from "../../networking/product";
 export default {
   components: {
     EditModal,
@@ -77,12 +78,11 @@ export default {
   },
   methods: {
     remove() {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/product/remove`, {
-          target: this.checkedRows[0].id,
-        })
+      removeProduct({
+        target: this.checkedRows[0].id,
+      })
         .then((res) => {
-          if (res.status == 200 && res.data.status) {
+          if (res.status == 200 && res.status) {
             this.$router.go(0);
             this.$buefy.notification.open({
               message: "제품 삭제가 정상적으로 처리되었습니다.",
@@ -91,7 +91,7 @@ export default {
             });
           } else {
             this.$buefy.notification.open({
-              message: `제품 삭제에 실패했습니다: ${res.data.message}`,
+              message: `제품 삭제에 실패했습니다: ${res.message}`,
               type: "is-danger",
               duration: 1000,
             });
@@ -127,7 +127,7 @@ export default {
         })
         .then((res) => {
           console.log(res);
-          if (res.data.status) {
+          if (res.status) {
             this.$router.go("");
             this.$buefy.notification.open({
               message: "제품 정보 변경이 정상처리 되었습니다.",

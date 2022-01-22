@@ -63,17 +63,17 @@
                 :src="imgSrc"
               />
             </div>
-            <div id="cancel" v-if="imgSrc != null">
-              <b-button class="is-danger" @click="deleteImage"
-                >사진 제거</b-button
-              >
+            <div v-if="imgSrc != null" id="cancel">
+              <b-button class="is-danger" @click="deleteImage">
+                사진 제거
+              </b-button>
             </div>
           </section>
         </div>
       </section>
       <footer class="modal-card-foot">
         <b-button label="닫기" @click="$emit('close')" />
-        <b-button label="추가" @click="submit" type="is-primary" />
+        <b-button label="추가" type="is-primary" @click="submit" />
       </footer>
     </div>
   </form>
@@ -84,6 +84,7 @@ import Inko from "inko";
 let inko = new Inko();
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
+import { modifyEvent } from "../../networking/event";
 
 export default {
   components: {
@@ -98,6 +99,19 @@ export default {
       compkey: 0,
     };
   },
+  computed: {
+    startString() {
+      return this.event.start ? this.event.start.toLocaleDateString() : "";
+    },
+    endString() {
+      return this.event.end ? this.event.end.toLocaleDateString() : "";
+    },
+    url() {
+      return this.currentImage == null
+        ? require("@/assets/logo.png")
+        : URL.createObjectURL(this.currentImage);
+    },
+  },
   methods: {
     deleteImage() {
       this.currentImage = null;
@@ -105,7 +119,7 @@ export default {
     },
     processResult(res) {
       console.log(res);
-      if (res.data.status) {
+      if (res.status) {
         this.$buefy.notification.open({
           message: "처리가 완료되었습니다.",
           type: "is-primary",
@@ -135,11 +149,9 @@ export default {
         formData.append("totalqty", this.event.totalqty);
         formData.append("amount", this.event.amount);
 
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/event`, formData)
-          .then((res) => {
-            this.processResult(res);
-          });
+        modifyEvent(formData).then((res) => {
+          this.processResult(res);
+        });
       });
     },
     setImage() {
@@ -161,19 +173,6 @@ export default {
       } else {
         alert("Sorry, FileReader API not supported");
       }
-    },
-  },
-  computed: {
-    startString() {
-      return this.event.start ? this.event.start.toLocaleDateString() : "";
-    },
-    endString() {
-      return this.event.end ? this.event.end.toLocaleDateString() : "";
-    },
-    url() {
-      return this.currentImage == null
-        ? require("@/assets/logo.png")
-        : URL.createObjectURL(this.currentImage);
     },
   },
 };

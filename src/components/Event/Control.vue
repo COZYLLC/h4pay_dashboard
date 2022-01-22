@@ -1,6 +1,6 @@
 <template>
   <div class="has-text-right">
-    <b-button class="is-primary" @click="modalActive = true">추가</b-button>
+    <b-button class="is-primary" @click="modalActive = true"> 추가 </b-button>
     <b-modal
       v-if="modalActive"
       v-model="modalActive"
@@ -15,10 +15,10 @@
         <EditModal
           style="text-align: left"
           v-bind="formProps"
-          @close="props.close"
           :title="title"
           :type="type"
-          :productToModify="product"
+          :product-to-modify="product"
+          @close="props.close"
         />
       </template>
     </b-modal>
@@ -26,12 +26,13 @@
 </template>
 
 <script>
+import { addEvent } from "../../networking/event";
 import EditModal from "./EditModal.vue";
 export default {
-  props: ["checkedRows"],
   components: {
     EditModal,
   },
+  props: ["checkedRows"],
   data() {
     return {
       modalActive: false,
@@ -50,13 +51,6 @@ export default {
       if (type == "modify") {
         this.product = this.checkedRows[0];
       }
-    },
-    addEvent() {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/event/`, this.eventToAdd)
-        .then((res) => {
-          console.log(res);
-        });
     },
   },
 };

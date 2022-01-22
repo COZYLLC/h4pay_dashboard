@@ -5,19 +5,24 @@
       class="is-info"
       style="margin-right: 7px"
       @click="exchange(type)"
-      >교환</b-button
     >
+      교환
+    </b-button>
     <b-button
-      v-if="type == 'order' && checkedRows.length != 0 && !checkedRows[0].exchanged"
+      v-if="
+        type == 'order' && checkedRows.length != 0 && !checkedRows[0].exchanged
+      "
       class="is-danger"
       style="margin-right: 7px"
       @click="cancel"
-      >취소</b-button
     >
+      취소
+    </b-button>
   </div>
 </template>
 
 <script>
+import { cancelOrder, exchangePurchase } from "../../networking/order";
 export default {
   props: ["checkedRows", "type"],
   data() {
@@ -30,7 +35,7 @@ export default {
     };
   },
   created() {
-    console.log(this.checkedRows)
+    console.log(this.checkedRows);
   },
   methods: {
     addProduct() {
@@ -64,38 +69,33 @@ export default {
           });
         }
       }
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/${typeString}/exchange`, {
-          orderId: orderIdArray,
-        })
-        .then((res) => {
-          this.$buefy.notification.open({
-            message: res.data.message,
-            type: res.data.status ? "is-primary" : "is-danger",
-            duration: 1000,
-          });
-          /*           for (let i = 0; i < orderIdArray.length; i++) {
+
+      exchangePurchase(typeString, {
+        orderId: orderIdArray,
+      }).then((res) => {
+        this.$buefy.notification.open({
+          message: res.message,
+          type: res.status ? "is-primary" : "is-danger",
+          duration: 1000,
+        });
+        /*           for (let i = 0; i < orderIdArray.length; i++) {
             let pos = this.data.map((purchase) => purchase.orderId).indexOf(orderIdArray[i]);
             this.data[pos].exchange = true;
           }
           this.data. */
-          this.$router.go();
-        });
+        this.$router.go();
+      });
     },
     cancel() {
       if (this.type == "order") {
-        this.$axios
-          .get(
-            `${process.env.VUE_APP_API_URL}/orders/cancel/${this.checkedRows[0].orderId}`
-          )
-          .then((res) => {
-            this.$buefy.notification.open({
-              message: res.data.message,
-              type: res.data.status ? "is-primary" : "is-danger",
-              duration: 1000,
-            });
-            this.$router.go();
+        cancelOrder(this.checkedRows[0].orderId).then((res) => {
+          this.$buefy.notification.open({
+            message: res.message,
+            type: res.status ? "is-primary" : "is-danger",
+            duration: 1000,
           });
+          this.$router.go();
+        });
       }
     },
   },

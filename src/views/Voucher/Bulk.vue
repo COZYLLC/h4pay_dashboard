@@ -10,6 +10,7 @@
 
 <script>
 import BulkForm from "@/views/Voucher/BulkForm.vue";
+import { issueVoucherRequest } from "@/networking/voucher";
 export default {
   components: {
     BulkForm,
@@ -25,8 +26,7 @@ export default {
         };
         formData.append("issuer", JSON.stringify(issuer));
 
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/voucher/request`, formData)
+        issueVoucherRequest(formData)
           .then((res) => {
             console.log(res);
             if (res.status == 200) {

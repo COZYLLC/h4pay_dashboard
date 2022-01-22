@@ -10,6 +10,10 @@
 
 <script>
 import BulkForm from "@/views/Voucher/BulkForm.vue";
+import {
+  issueVoucherRequest,
+  approveVoucherRequest,
+} from "@/networking/voucher";
 export default {
   components: {
     BulkForm,
@@ -25,12 +29,11 @@ export default {
         };
         formData.append("issuer", JSON.stringify(issuer));
 
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/voucher/request`, formData)
+        issueVoucherRequest(formData)
           .then((res) => {
             console.log(res);
             if (res.status == 200) {
-              this.approveDirectly(res.data.id);
+              this.approveDirectly(res.result.id);
             } else if (res.status == 500) {
               this.$buefy.notification.open({
                 message:
@@ -56,12 +59,9 @@ export default {
       });
     },
     approveDirectly(requestId) {
-      this.$axios
-        .post(
-          `${process.env.VUE_APP_API_URL}/voucher/request/${requestId}/approve`
-        )
+      approveVoucherRequest(requestId)
         .then((res) => {
-          if (res.status == 200 && res.data.status) {
+          if (res.status == 200 && res.status) {
             this.$buefy.notification.open({
               message: "상품권 발행 및 선물이 정상 처리되었습니다.",
               type: "is-success",

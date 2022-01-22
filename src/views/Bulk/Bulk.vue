@@ -3,6 +3,7 @@
 </template>
 <script>
 import BulkForm from "./BulkForm.vue";
+import { bulkRequest, bulkRequestWithExcel } from "@/networking/bulk";
 export default {
   components: {
     BulkForm,
@@ -10,14 +11,13 @@ export default {
   methods: {
     submit(data) {
       console.log("non-excel");
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/bulk/request/`, data)
+      bulkRequest(data)
         .then((res) => {
-          if (res.status == 200 && res.data.status) {
+          if (res.status == 200 && res.status) {
             alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
             this.$router.push("/gift");
           } else {
-            alert(res.data.message);
+            alert(res.message);
             this.$router.push("/gift");
           }
         })
@@ -31,19 +31,14 @@ export default {
       if (typeof data.get("excel") == "function") {
         alert("파일을 업로드해주세요!");
       } else {
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/bulk/request/excel`, data, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
+        bulkRequestWithExcel(data)
           .then((res) => {
             console.log(res);
-            if (res.data.status == true) {
+            if (res.status == true) {
               alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
               this.$router.push("/gift");
             } else {
-              alert(res.data.message);
+              alert(res.message);
               this.$router.push("/gift");
             }
           })

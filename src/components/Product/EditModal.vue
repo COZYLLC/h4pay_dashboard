@@ -87,6 +87,7 @@ import Inko from "inko";
 let inko = new Inko();
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
+import { addProduct, modifyProduct } from "../../networking/product";
 
 export default {
   components: {
@@ -120,7 +121,7 @@ export default {
       this.$refs.cropper.destroy();
     },
     processResult(res) {
-      if (res.data.status) {
+      if (res.status) {
         this.$buefy.notification.open({
           message: "처리가 완료되었습니다.",
           type: "is-primary",
@@ -149,19 +150,15 @@ export default {
           formData.append("price", this.product.price);
           formData.append("desc", this.product.desc);
           formData.append("soldout", this.product.soldout);
-          this.$axios
-            .post(`${process.env.VUE_APP_API_URL}/product/add`, formData)
-            .then((res) => {
-              this.processResult(res);
-            });
+          addProduct(formData).then((res) => {
+            this.processResult(res);
+          });
         });
       } else if (this.type == "modify") {
         this.product.target = this.product.id;
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/product/modify`, this.product)
-          .then((res) => {
-            this.processResult(res);
-          });
+        modifyProduct(this.product).then((res) => {
+          this.processResult(res);
+        });
       }
     },
     setImage() {

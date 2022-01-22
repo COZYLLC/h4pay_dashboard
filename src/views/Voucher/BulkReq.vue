@@ -56,6 +56,9 @@ import TableLoading from "../../components/TableLoading.vue";
 import BulkReqDetail from "@/components/BulkReq/Detail.vue";
 import BulkReqControl from "@/components/BulkReq/Control.vue";
 import dateUtil from "@/js/dateUtil.js";
+import { getVouchers } from "@/networking/voucher";
+import { getProducts } from "../../networking/product";
+
 export default {
   name: "Home",
   components: {
@@ -122,16 +125,14 @@ export default {
     },
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list.reverse();
-          if (this.$route.query.orderId != null) {
-            this.findRequest();
-          }
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result.reverse();
+        if (this.$route.query.orderId != null) {
+          this.findRequest();
         }
-      });
+      }
+    });
   },
   methods: {
     getSpecificValuesInTargets(targets, key) {
@@ -149,34 +150,28 @@ export default {
       if (this.selectedEnd != null) {
         this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
       }
-      this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/voucher/request/filter`, {
-          params: {
-            dateFrom:
-              this.selectedStart != null
-                ? this.selectedStart.toISOString()
-                : undefined,
-            dateTo:
-              this.selectedEnd != null
-                ? this.selectedEnd.toISOString()
-                : undefined,
-            issuer: this.id || undefined,
-            amountMin: this.amountMin || undefined,
-            amountMax: this.amountMax || undefined,
-          },
-        })
-        .then((requestRes) => {
-          console.log(requestRes);
-          if (requestRes.data.status) {
-            this.data = requestRes.data.result;
-            this.loaded = true;
-            this.$buefy.notification.open({
-              message: "조회에 성공했습니다!",
-              type: "is-primary",
-              duration: 1000,
-            });
-          }
-        });
+      getVouchers({
+        dateFrom:
+          this.selectedStart != null
+            ? this.selectedStart.toISOString()
+            : undefined,
+        dateTo:
+          this.selectedEnd != null ? this.selectedEnd.toISOString() : undefined,
+        issuer: this.id || undefined,
+        amountMin: this.amountMin || undefined,
+        amountMax: this.amountMax || undefined,
+      }).then((requestRes) => {
+        console.log(requestRes);
+        if (requestRes.status) {
+          this.data = requestRes.result;
+          this.loaded = true;
+          this.$buefy.notification.open({
+            message: "조회에 성공했습니다!",
+            type: "is-primary",
+            duration: 1000,
+          });
+        }
+      });
     },
   },
 };

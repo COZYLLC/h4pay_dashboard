@@ -1,9 +1,7 @@
 <template>
   <div class="App">
     <section id="form" style="text-align: left; width: 45vw; margin: auto">
-      <p class="title" style="text-align: center">
-        회원가입
-      </p>
+      <p class="title" style="text-align: center; color: black">회원가입</p>
       <b-field label="이름" :type="isValid(nameState)" horizontal>
         <b-input v-model="form.name" type="text" />
       </b-field>
@@ -73,7 +71,9 @@
         </div>
 
         <footer class="card-footer">
-          <a href="#" class="card-footer-item" @click="closeModal">동의합니다</a>
+          <a href="#" class="card-footer-item" @click="closeModal"
+            >동의합니다</a
+          >
         </footer>
       </div>
     </b-modal>
@@ -83,6 +83,7 @@
 <script>
 import axios from "axios";
 import { createHash } from "crypto";
+import { register } from "../networking/users";
 
 export default {
   data() {
@@ -203,7 +204,7 @@ export default {
 
   methods: {
     checkValidKey(role) {
-      console.log(role)
+      console.log(role);
       let valid = false;
       switch (role) {
         case "A":
@@ -290,16 +291,15 @@ export default {
         role: this.form.role,
       };
       console.log(data);
-      axios
-        .post(process.env.VUE_APP_API_URL + `/users/create`, data)
+      register(data)
         .then((res) => {
-          if (res.data.status == true) {
+          if (res.status == true) {
             alert("회원가입이 완료되었습니다. 로그인을 진행해주세요.");
             this.$router.push({ path: "/login" });
           } else {
             alert("이미 존재하는 아이디입니다.");
           }
-          //this.$store.commit('loginToken', res.data)
+          //this.$store.commit('loginToken', res)
         })
         .catch((error) => {
           this.$Sentry.captureException(error);
@@ -338,7 +338,6 @@ export default {
 </script>
 
 <style>
-
 body {
   margin: 0;
 }
@@ -363,5 +362,4 @@ body {
 .title {
   color: white;
 }
-
 </style>

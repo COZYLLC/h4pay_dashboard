@@ -33,7 +33,7 @@
 <script>
 export default {
   props: {
-    product: { type: Object, default: () => [] },
+    product: { type: Object, default: () => {} },
     qty: { type: Number, default: 0 },
     controlable: { type: Boolean, default: false },
   },

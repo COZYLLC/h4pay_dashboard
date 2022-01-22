@@ -134,6 +134,17 @@
         ]
     },
     {
+        "title": "관리자 관리",
+        "icon": "user",
+        "route": "/admin",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
         "title": "로그아웃",
         "icon": "sign-out-alt",
         "route": "/login",

@@ -3,6 +3,7 @@
 </template>
 <script>
 import BulkForm from "./BulkForm.vue";
+import { bulkRequest, bulkRequestWithExcel } from "@/networking/bulk";
 export default {
   components: {
     BulkForm,
@@ -11,13 +12,12 @@ export default {
     submit(data) {
       console.log("non-excel");
 
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/bulk/request/`, data)
+      bulkRequest(data)
         .then((res) => {
-          if (res.status == 200 && res.data.status) {
-            this.approveDirectly(res.data.id);
+          if (res.status == 200 && res.status) {
+            this.approveDirectly(res.id);
           } else {
-            alert(res.data.message);
+            alert(res.message);
             this.$router.push("/gift");
           }
         })
@@ -33,18 +33,17 @@ export default {
       ) {
         alert("파일을 업로드해주세요!");
       } else {
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/bulk/request`, data, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
+        bulkRequestWithExcel(data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
           .then((res) => {
             console.log(res);
-            if (res.data.status == true && res.data.id != null) {
-              this.approveDirectly(res.data.id);
+            if (res.status == true && res.id != null) {
+              this.approveDirectly(res.id);
             } else {
-              alert(res.data.message);
+              alert(res.message);
             }
           })
           .catch((error) => {
@@ -53,26 +52,23 @@ export default {
       }
     },
     approveDirectly(requestId) {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/bulk/${requestId}/approve`)
-        .then((res) => {
-          if (res.data.status) {
-            this.$buefy.notification.open({
-              message: "정상 처리되었습니다.",
-              type: "is-primary",
-              duration: 1000,
-            });
-            this.$router.push("/gift");
-          } else {
-            this.$buefy.notification.open({
-              message:
-                "대량선물 처리에 실패했습니다. 개발자에게 문의 바랍니다.",
-              type: "is-primary",
-              duration: 1000,
-            });
-            this.$router.push("/gift");
-          }
-        });
+      approveRequest(requestId).then((res) => {
+        if (res.status) {
+          this.$buefy.notification.open({
+            message: "정상 처리되었습니다.",
+            type: "is-primary",
+            duration: 1000,
+          });
+          this.$router.push("/gift");
+        } else {
+          this.$buefy.notification.open({
+            message: "대량선물 처리에 실패했습니다. 개발자에게 문의 바랍니다.",
+            type: "is-primary",
+            duration: 1000,
+          });
+          this.$router.push("/gift");
+        }
+      });
     },
   },
 };

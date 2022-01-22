@@ -45,12 +45,12 @@
            res => {
              console.log(res)
              commit("loginCheckM", {
-               uid: res.data.message.uid,
-               name: res.data.message.name,
-               email: res.data.message.email,
-               role: res.data.message.role
+               uid: res.data.result.uid,
+               name: res.data.result.name,
+               email: res.data.result.email,
+               role: res.data.result.role
              });
-             return res.data;
+             return res;
            }
          ).catch(
            (e) => {

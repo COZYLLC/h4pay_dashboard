@@ -113,6 +113,7 @@ export default {
       console.log(id);
       this.activeStep++;
       this.selectedVoucher = id;
+      this.inputedAmount = this.vouchers[id].amount;
     },
     submit() {
       if (this.inputedAmount < 1000) {

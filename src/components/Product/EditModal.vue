@@ -88,6 +88,7 @@ let inko = new Inko();
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
 import { addProduct, modifyProduct } from "../../networking/product";
+import notification from "@/js/notification";
 
 export default {
   components: {
@@ -122,12 +123,11 @@ export default {
     },
     processResult(res) {
       if (res.status) {
-        this.$buefy.notification.open({
-          message: "처리가 완료되었습니다.",
-          type: "is-primary",
-          duration: 1000,
-        });
-        this.$router.go();
+        notification
+          .show(this, `제품 정보 처리에 성공했습니다.`, "is-success", 2500)
+          .then((_) => {
+            this.$router.push("/");
+          });
       } else {
         this.$buefy.notification.open({
           message: "처리에 실패했습니다.",
@@ -137,29 +137,35 @@ export default {
       }
     },
     submit() {
-      if (this.type == "add") {
+      this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
+        const file = new File(
+          [blob],
+          inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
+        );
         const formData = new FormData();
-        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-          const file = new File(
-            [blob],
-            inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
-          );
-          formData.append("file", file);
-          formData.append("productName", this.product.productName);
-          formData.append("barcode", this.product.barcode);
-          formData.append("price", this.product.price);
+        formData.append("productName", this.product.productName);
+        formData.append("barcode", this.product.barcode);
+        formData.append("price", this.product.price);
+        formData.append("file", file);
+        if (this.type == "add") {
           formData.append("desc", this.product.desc);
           formData.append("soldout", this.product.soldout);
           addProduct(formData).then((res) => {
             this.processResult(res);
           });
-        });
-      } else if (this.type == "modify") {
-        this.product.target = this.product.id;
-        modifyProduct(this.product).then((res) => {
-          this.processResult(res);
-        });
-      }
+        } else if (this.type == "modify") {
+          formData.append("target", this.product.id);
+          formData.append(
+            "desc",
+            this.product.desc != null ? this.product.desc : ""
+          );
+          formData.append("img", this.product.img);
+          formData.append("soldout", !this.product.soldout);
+          modifyProduct(formData).then((res) => {
+            this.processResult(res);
+          });
+        }
+      });
     },
     setImage() {
       const file = this.selectedFile;

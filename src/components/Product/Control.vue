@@ -58,7 +58,8 @@
 
 <script>
 import EditModal from "@/components/Product/EditModal";
-import { removeProduct } from "../../networking/product";
+import { modifyProduct, removeProduct } from "../../networking/product";
+import notification from "@/js/notification";
 export default {
   components: {
     EditModal,
@@ -83,26 +84,35 @@ export default {
       })
         .then((res) => {
           if (res.status == 200 && res.status) {
-            this.$router.go(0);
-            this.$buefy.notification.open({
-              message: "제품 삭제가 정상적으로 처리되었습니다.",
-              type: "is-success",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                "제품 삭제가 정상적으로 처리되었습니다.",
+                "is-success",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           } else {
-            this.$buefy.notification.open({
-              message: `제품 삭제에 실패했습니다: ${res.message}`,
-              type: "is-danger",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                `제품 삭제에 실패했습니다: ${res.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           }
         })
         .catch((err) => {
-          this.$buefy.notification.open({
-            message: `제품 삭제에 실패했습니다: ${err.message}`,
-            type: "is-danger",
-            duration: 1000,
-          });
+          notification
+            .show(this, `제품 삭제에 실패했습니다: ${err}`, "is-danger", 2500)
+            .then((_) => {
+              this.$router.go(0);
+            });
         });
     },
     showModal(type) {
@@ -116,31 +126,56 @@ export default {
     },
 
     toggleSoldout(product) {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/product/modify`, {
-          target: product.id,
-          productName: product.productName,
-          price: product.price,
-          desc: product.desc != null ? product.desc : "",
-          img: product.img,
-          soldout: !product.soldout,
-        })
+      const formData = new FormData();
+      formData.append("target", product.id);
+      formData.append("productName", product.productName);
+      formData.append("barcode", product.barcode);
+      formData.append("price", product.price);
+      formData.append("desc", product.desc != null ? product.desc : "");
+      formData.append("img", product.img);
+      formData.append("soldout", !product.soldout);
+      modifyProduct(formData)
         .then((res) => {
           console.log(res);
           if (res.status) {
-            this.$router.go("");
-            this.$buefy.notification.open({
-              message: "제품 정보 변경이 정상처리 되었습니다.",
-              type: "is-primary",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                `${
+                  !product.soldout ? "품절처리" : "구매가능"
+                } 처리가 정상처리 되었습니다.`,
+                "is-success",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           } else {
-            this.$buefy.notification.open({
-              message: "제품 정보 변경에 실패했습니다.",
-              type: "is-danger",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                `${
+                  !product.soldout ? "품절처리" : "구매가능"
+                } 처리에 실패했습니다: ${res.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           }
+        })
+        .catch((err) => {
+          notification
+            .show(
+              this,
+              `제품 정보 변경에 실패했습니다: ${err}`,
+              "is-danger",
+              2500
+            )
+            .then((_) => {
+              this.$router.go(0);
+            });
         });
     },
   },

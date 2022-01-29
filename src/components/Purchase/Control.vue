@@ -22,7 +22,9 @@
 </template>
 
 <script>
-import { cancelOrder, exchangePurchase } from "../../networking/order";
+import { exchangeGift } from "../../networking/gift";
+import { cancelOrder, exchangeOrder } from "../../networking/order";
+import notification from "@/js/notification";
 export default {
   props: ["checkedRows", "type"],
   data() {
@@ -41,10 +43,8 @@ export default {
     addProduct() {
       console.log("add");
     },
-    exchange(type) {
+    exchange() {
       let exchanged = 0;
-      let typeString = type;
-      if (type == "order") typeString = "orders";
       let orderIdArray = [];
       for (let i = 0; i < this.checkedRows.length; i++) {
         orderIdArray.push(this.checkedRows[i].orderId);
@@ -69,32 +69,36 @@ export default {
           });
         }
       }
-
-      exchangePurchase(typeString, {
+      const exchangePromise =
+        this.type == "order" ? exchangeOrder : exchangeGift;
+      exchangePromise({
         orderId: orderIdArray,
       }).then((res) => {
-        this.$buefy.notification.open({
-          message: res.message,
-          type: res.status ? "is-primary" : "is-danger",
-          duration: 1000,
-        });
-        /*           for (let i = 0; i < orderIdArray.length; i++) {
-            let pos = this.data.map((purchase) => purchase.orderId).indexOf(orderIdArray[i]);
-            this.data[pos].exchange = true;
-          }
-          this.data. */
-        this.$router.go();
+        notification
+          .show(
+            this,
+            res.message,
+            res.status ? "is-primary" : "is-danger",
+            2500
+          )
+          .then((_) => {
+            this.$router.push("/");
+          });
       });
     },
     cancel() {
       if (this.type == "order") {
         cancelOrder(this.checkedRows[0].orderId).then((res) => {
-          this.$buefy.notification.open({
-            message: res.message,
-            type: res.status ? "is-primary" : "is-danger",
-            duration: 1000,
-          });
-          this.$router.go();
+          notification
+            .show(
+              this,
+              res.message,
+              res.status ? "is-primary" : "is-danger",
+              2500
+            )
+            .then((_) => {
+              this.$router.push("/");
+            });
         });
       }
     },

@@ -12,6 +12,8 @@ import Login from "@/views/Login"
 import Register from "@/views/Register"
 import Success from '@/views/Success'
 import Admin from "@/views/Admin"
+import School from "@/views/School"
+import SchoolPwChanger from "@/views/SchoolPwChanger"
 
 //Voucher
 import VoucherBulk from "@/views/Voucher/Bulk.vue"
@@ -114,6 +116,20 @@ const routes = [
     path: "/admin",
     name: "Admin",
     component: Admin,
+  },
+  {
+    path: "/school",
+    name: "School",
+    component: School,
+  },
+  {
+    path:"/school/init/:token",
+    name: "SchoolPwChanger",
+    component: SchoolPwChanger,
+    props:true,
+    meta: {
+      hideNavigation:true
+    }
   }
 ];
 

@@ -56,7 +56,7 @@ import TableLoading from "../../components/TableLoading.vue";
 import BulkReqDetail from "@/components/BulkReq/Detail.vue";
 import BulkReqControl from "@/components/BulkReq/Control.vue";
 import dateUtil from "@/js/dateUtil.js";
-import { getVouchers } from "@/networking/voucher";
+import { getVoucherRequests } from "@/networking/voucher";
 import { getProducts } from "../../networking/product";
 
 export default {
@@ -150,7 +150,7 @@ export default {
       if (this.selectedEnd != null) {
         this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
       }
-      getVouchers({
+      getVoucherRequests({
         dateFrom:
           this.selectedStart != null
             ? this.selectedStart.toISOString()

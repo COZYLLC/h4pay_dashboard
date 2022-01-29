@@ -17,6 +17,7 @@
      uid: "",
      name: "",
      email: "",
+     schoolId: "",
    },
    actions: {
      loginTokenA(context) {
@@ -48,7 +49,8 @@
                uid: res.data.result.uid,
                name: res.data.result.name,
                email: res.data.result.email,
-               role: res.data.result.role
+               role: res.data.result.role,
+               schoolId: res.data.result.schoolId
              });
              return res;
            }
@@ -75,6 +77,7 @@
        state.name = fetchedData.name;
        state.email = fetchedData.email
        state.role = fetchedData.role;
+       state.schoolId = fetchedData.schoolId
      }
    },
    getters: {
@@ -83,6 +86,7 @@
      getName: state => state.name,
      getEmail: state => state.email,
      getRole: state => state.role,
+     getSchoolId: state => state.schoolId
    }
  });
  

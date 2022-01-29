@@ -58,7 +58,7 @@
                 ]
             },
             {
-                "title": "대량선물 조회 및 승인",
+                "title": "대량선물 기록/요청",
                 "icon": "clipboard-list",
                 "route": "bulk/lookup",
                 "role": [
@@ -142,6 +142,16 @@
         "role": [
             "SA",
             "AT"
+        ]
+    },
+    {
+        "title": "학교 관리",
+        "icon": "school",
+        "route": "/school",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA"
         ]
     },
     {

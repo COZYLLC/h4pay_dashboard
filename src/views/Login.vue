@@ -10,10 +10,10 @@
             <div class="content">
               <p class="title">로그인</p>
               <b-field
-                label="아이디"
-                :type="idState ? 'is-primary' : 'is-danger'"
+                label="휴대전화번호"
+                :type="telState ? 'is-primary' : 'is-danger'"
               >
-                <b-input v-model="id" @keyup.native.enter="submit"></b-input>
+                <b-input v-model="tel" @keyup.native="getPhoneMask"></b-input>
               </b-field>
               <b-field
                 label="비밀번호"
@@ -56,17 +56,18 @@
 
 <script>
 import { createHash } from "crypto";
-import { login } from "../networking/users.js";
+import { getMask } from "@/js/telMask";
 export default {
   data() {
     return {
-      id: "",
+      tel: "",
       pw: "",
     };
   },
   computed: {
-    idState() {
-      return this.id.length > 0 && this.id != "";
+    telState() {
+      const telRegExp = RegExp(/^\d{3}-\d{4}-\d{4}$/);
+      return this.tel.length > 0 && telRegExp.test(this.tel);
     },
     pwState() {
       return this.pw.length > 0 && this.pw != "";
@@ -76,10 +77,13 @@ export default {
     this.$store.commit("logoutM");
   },
   methods: {
+    getPhoneMask() {
+      this.tel = getMask(this.tel);
+    },
     submit() {
       this.$axios
         .post(`${process.env.VUE_APP_API_URL}/users/login`, {
-          uid: this.id,
+          tel: this.tel.replace(/-/gi, ""),
           password: createHash("sha256").update(this.pw).digest("base64"),
         })
         .then((res) => {

@@ -32,28 +32,23 @@ export default {
         issueVoucherRequest(formData)
           .then((res) => {
             console.log(res);
-            if (res.status == 200) {
-              this.approveDirectly(res.result.id);
-            } else if (res.status == 500) {
+            if (res.status) {
+              this.approveDirectly(res.result);
+            } else {
               this.$buefy.notification.open({
                 message:
                   "선물에 실패했습니다. 서버 내부 오류입니다. 관리자에게 문의해주세요.",
                 type: "is-danger",
-                duration: 1500,
-              });
-            } else {
-              this.$buefy.notification.open({
-                message: "요청에 실패했습니다.",
-                type: "is-danger",
-                duration: 1000,
+                duration: 3000,
               });
             }
           })
           .catch((err) => {
+            console.log(err);
             this.$buefy.notification.open({
               message: `오류가 발생했습니다: ${err.message}`,
               type: "is-danger",
-              duration: 1000,
+              duration: 3000,
             });
           });
       });
@@ -61,18 +56,18 @@ export default {
     approveDirectly(requestId) {
       approveVoucherRequest(requestId)
         .then((res) => {
-          if (res.status == 200 && res.status) {
+          if (res.status) {
             this.$buefy.notification.open({
               message: "상품권 발행 및 선물이 정상 처리되었습니다.",
               type: "is-success",
-              duration: 1000,
+              duration: 3000,
             });
             this.$router.push("/voucher/log/publish");
           } else {
             this.$buefy.notification.open({
               message: "요청에 실패했습니다.",
               type: "is-danger",
-              duration: 1000,
+              duration: 3000,
             });
           }
         })
@@ -80,7 +75,7 @@ export default {
           this.$buefy.notification.open({
             message: `오류가 발생했습니다: ${err.message}`,
             type: "is-danger",
-            duration: 1000,
+            duration: 3000,
           });
         });
     },

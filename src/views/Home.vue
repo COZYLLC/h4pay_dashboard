@@ -126,15 +126,10 @@ export default {
     getManySoldProduct(orders) {
       let qty = [];
       orders.forEach((order) => {
-        this.jsonToList(order.item).forEach((item) => {
-          if (item.qty > 0) {
-            if (qty[item.id] != null) {
-              qty[item.id] += item.qty;
-            } else {
-              qty[item.id] = item.qty;
-            }
-          }
-        });
+        const item = order.item;
+        for (var key in item) {
+          qty[key] = item[key];
+        }
       });
       let max = [0, 0];
       qty.forEach((item, idx) => {
@@ -144,13 +139,6 @@ export default {
         }
       });
       this.weekly.manySoldProduct = this.products[max[0]].productName;
-    },
-    jsonToList(json) {
-      let resultArray = [];
-      for (let i = 0; i < json.length; i++) {
-        resultArray.push(json);
-      }
-      return resultArray;
     },
   },
 };

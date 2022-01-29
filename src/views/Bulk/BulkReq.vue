@@ -147,15 +147,21 @@ export default {
         issuer: this.id || undefined,
         amountMin: this.amountMin || undefined,
         amountMax: this.amountMax || undefined,
-      }).then((requestRes) => {
-        console.log(requestRes);
-        if (requestRes.status) {
-          this.data = requestRes.result;
+      }).then((res) => {
+        console.log(res);
+        if (res.status) {
+          this.data = res.result;
           this.loaded = true;
           this.$buefy.notification.open({
             message: "조회에 성공했습니다!",
             type: "is-primary",
             duration: 1000,
+          });
+        } else {
+          this.$buefy.notification.open({
+            message: `조회에 실패했습니다: ${res.message}`,
+            type: "is-danger",
+            duration: 2500,
           });
         }
       });

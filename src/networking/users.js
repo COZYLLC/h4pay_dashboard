@@ -1,12 +1,29 @@
 import {getService} from "./H4PayService"
-const baseUrl = process.env.VUE_APP_API_URL
+const baseUrl = process.env.VUE_APP_API_URL + "/users"
 
 function register(data) {
-  return getService().post(`${baseUrl}/users/create`, data)
+  return getService().post(`${baseUrl}/create`, data)
 }
 
+// Admin
 function getUnverifiedUsers() {
-  return getService().get(`${baseUrl}/users/reqlist`)
+  return getService().get(`${baseUrl}/reqlist`)
 }
 
-export {register, getUnverifiedUsers}
+function approveUser(users) {
+  const ids = [];
+  for (var user of users) {
+    ids.push(user.id)
+  }
+  return getService().post(`${baseUrl}/approve`, {id: ids,  approve:true})
+}
+
+function rejectUser(users) {
+  const ids = [];
+  for (var user of users) {
+    ids.push(user.id)
+  }
+  return getService().post(`${baseUrl}/approve`, {id: ids,  approve:false})
+}
+
+export {register, getUnverifiedUsers, approveUser, rejectUser}

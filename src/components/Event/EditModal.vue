@@ -2,7 +2,9 @@
   <form action="">
     <div class="modal-card" style="width: auto">
       <header class="modal-card-head">
-        <p class="modal-card-title">이벤트 추가</p>
+        <p class="modal-card-title">
+          {{ title }}
+        </p>
 
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
@@ -17,7 +19,7 @@
           <b-input v-model="event.amount" type="number" />
         </b-field>
         <b-field label="시작 일시">
-          <b-datepicker v-model="event.start" :mobile-native="false">
+          <b-datepicker v-model="startDate" :mobile-native="false">
             <template v-slot:trigger>
               <b-button icon-left="calendar" type="is-primary" />
             </template>
@@ -25,7 +27,7 @@
           <b-input expanded readonly :value="startString" />
         </b-field>
         <b-field label="종료 일시">
-          <b-datepicker v-model="event.end" :mobile-native="false">
+          <b-datepicker v-model="endDate" :mobile-native="false">
             <template v-slot:trigger>
               <b-button icon-left="calendar" type="is-primary" />
             </template>
@@ -84,33 +86,51 @@ import Inko from "inko";
 let inko = new Inko();
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
-import { modifyEvent } from "../../networking/event";
+import { addEvent, modifyEvent } from "../../networking/event";
 
 export default {
   components: {
     VueCropper,
   },
-  props: ["email", "password", "canCancel", "title", "type", "productToModify"],
+  props: ["email", "password", "canCancel", "title", "type", "eventToModify"],
   data() {
     return {
       selectedFile: null,
       imgSrc: "",
-      event: {},
+      event: {
+        id: null,
+        name: null,
+        desc: null,
+        amount: null,
+        start: null,
+        end: null,
+        totalqty: null,
+      },
       compkey: 0,
     };
   },
   computed: {
     startString() {
-      return this.event.start ? this.event.start.toLocaleDateString() : "";
+      return this.event.start != null
+        ? this.event.start.toLocaleDateString()
+        : "";
     },
     endString() {
-      return this.event.end ? this.event.end.toLocaleDateString() : "";
+      return this.event.end != null ? this.event.end.toLocaleDateString() : "";
     },
     url() {
       return this.currentImage == null
         ? require("@/assets/logo.png")
         : URL.createObjectURL(this.currentImage);
     },
+  },
+  created() {
+    if (this.type == "modify") {
+      this.eventToModify.start = new Date(this.eventToModify.start);
+      this.eventToModify.end = new Date(this.eventToModify.end);
+      console.log(this.eventToModify);
+      this.event = this.eventToModify;
+    }
   },
   methods: {
     deleteImage() {
@@ -120,18 +140,22 @@ export default {
     processResult(res) {
       console.log(res);
       if (res.status) {
-        this.$buefy.notification.open({
-          message: "처리가 완료되었습니다.",
-          type: "is-primary",
-          duration: 1000,
-        });
-        this.$router.go();
+        notification
+          .show(this, "이벤트 처리에 성공했습니다.", "is-success", 2500)
+          .then((_) => {
+            this.$router.push("/");
+          });
       } else {
-        this.$buefy.notification.open({
-          message: "처리에 실패했습니다.",
-          type: "is-danger",
-          duration: 1000,
-        });
+        notification
+          .show(
+            this,
+            `이벤트 처리에 실패했습니다: ${res.message}`,
+            "is-success",
+            2500
+          )
+          .then((_) => {
+            this.$router.push("/");
+          });
       }
     },
     submit() {
@@ -148,10 +172,15 @@ export default {
         formData.append("end", this.event.end);
         formData.append("totalqty", this.event.totalqty);
         formData.append("amount", this.event.amount);
-
-        modifyEvent(formData).then((res) => {
-          this.processResult(res);
-        });
+        if (this.type == "add") {
+          addEvent(formData).then((res) => {
+            this.processResult(res);
+          });
+        } else {
+          modifyEvent(this.event.id, formData).then((res) => {
+            this.processResult(res);
+          });
+        }
       });
     },
     setImage() {

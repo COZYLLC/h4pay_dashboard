@@ -43,7 +43,7 @@
       >
         <template v-if="isDateField(column.field)">
           <!-- 날짜필드 -->
-          {{ new Date(props.row[column.field]).toLocaleDateString() }}
+          {{ new Date(props.row[column.field]).toLocaleString() }}
         </template>
         <template v-else-if="column.field == 'product'">
           <!-- 대량선물에서 제품 필드 -->

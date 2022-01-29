@@ -5,13 +5,12 @@ function getService() {
   console.log(process.env.VUE_APP_API_URL)
   const axiosInstance = axios.create({
     baseUrl: process.env.VUE_APP_API_URL,
-    timeout : 3000,
   })
   axiosInstance.interceptors.request.use(
     (config) => {
       console.log(config)
       config.headers["Content-Type"] = "application/json; charset=utf-8";
-      config.headers["Authorization"] = store.state.token;
+      config.headers["x-access-token"] = store.state.token;
       return config;
     },
     (error) => {

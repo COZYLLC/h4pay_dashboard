@@ -1,5 +1,20 @@
 <template>
-  <div />
+  <div>
+    <span v-if="success == null">
+      <h1>결제가 처리중입니다...</h1>
+      <div id="container">
+        <div id="ball-1" class="circle"></div>
+        <div id="ball-2" class="circle"></div>
+        <div id="ball-3" class="circle"></div>
+      </div>
+    </span>
+    <span v-else-if="success == true">
+      <h1>결제가 정상 처리되었습니다!</h1>
+    </span>
+    <span v-else>
+      <h1>결제에 실패했습니다..</h1>
+    </span>
+  </div>
 </template>
 <script>
 import { approveRequest } from "@/networking/bulk";
@@ -10,6 +25,7 @@ export default {
       orderId: "",
       paymentKey: "",
       amount: "",
+      success: null,
     };
   },
   created() {
@@ -30,10 +46,12 @@ export default {
         console.log(res);
         if (res.status) {
           alert("대량선물 승인에 성공했습니다!");
-          this.$router.push("/");
+          this.success = true;
+          this.$router.push("/gift");
         } else {
           alert("대량선물 승인에 실패했습니다..");
-          this.$router.push("/");
+          this.success = false;
+          this.$router.push("/gift/bulk/lookup");
         }
       });
     },
@@ -45,10 +63,10 @@ export default {
         console.log(res);
         if (res.status) {
           alert("대량선물 승인에 성공했습니다!");
-          this.$router.push("/");
+          this.$router.push("/gift");
         } else {
           alert("대량선물 승인에 실패했습니다..");
-          this.$router.push("/");
+          this.$router.push("/gift/bulk/lookup");
         }
       });
     },
@@ -72,3 +90,64 @@ export default {
   },
 };
 </script>
+<style scoped>
+body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+h1 {
+  font-size: 2rem;
+  text-align: center;
+}
+
+.circle {
+  display: inline-block;
+  background-color: #4f83d6;
+  height: 25px;
+  width: 25px;
+  border-radius: 25px;
+  margin: 0 5px;
+}
+
+#container {
+  height: 200px;
+  margin-top: 10vh;
+  text-align: center;
+}
+
+#ball-1 {
+  -webkit-animation-name: bounce;
+  -webkit-animation-delay: 0s;
+  -webkit-animation-duration: 1.2s;
+  -webkit-animation-iteration-count: infinite;
+}
+#ball-2 {
+  -webkit-animation-name: bounce;
+  -webkit-animation-delay: 0.1s;
+  -webkit-animation-duration: 1.2s;
+  -webkit-animation-iteration-count: infinite;
+}
+#ball-3 {
+  -webkit-animation-name: bounce;
+  -webkit-animation-delay: 0.2s;
+  -webkit-animation-duration: 1.2s;
+  -webkit-animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(23px);
+  }
+  60% {
+    transform: translateY(-25px);
+  }
+  80% {
+    transform: translateY(0);
+  }
+}
+</style>

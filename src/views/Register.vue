@@ -2,12 +2,27 @@
   <div class="App">
     <section id="form" style="text-align: left; width: 45vw; margin: auto">
       <p class="title" style="text-align: center; color: black">회원가입</p>
+      <b-field label="학교" horizontal>
+        <b-select v-model="form.schoolId">
+          <option
+            v-for="(option, i) in schoolOptions"
+            :key="i"
+            :value="option.value"
+          >
+            {{ option.text }}
+          </option>
+        </b-select>
+      </b-field>
       <b-field label="이름" :type="isValid(nameState)" horizontal>
         <b-input v-model="form.name" type="text" />
       </b-field>
       <b-field label="사용자 유형" horizontal>
         <b-select v-model="form.role">
-          <option v-for="(option, i) in options" :key="i" :value="option.value">
+          <option
+            v-for="(option, i) in roleOptions"
+            :key="i"
+            :value="option.value"
+          >
             {{ option.text }}
           </option>
         </b-select>
@@ -84,23 +99,31 @@
 import axios from "axios";
 import { createHash } from "crypto";
 import { register } from "../networking/users";
+import { getSchools } from "../networking/school";
 
 export default {
   data() {
     return {
       url: window.location.origin,
       tabIndex: 3,
-      options: [
+      roleOptions: [
         { value: null, text: "항목을 선택해주세요" },
         { value: "A", text: "행정실 관리자" },
         { value: "AT", text: "매점 관리 교사" },
         { value: "T", text: "일반 교사" },
+      ],
+      schoolOptions: [
+        {
+          value: null,
+          text: "학교를 선택하세요.",
+        },
       ],
       agreements: [
         { text: "(필수) H4Pay 이용약관", url: "terms" },
         { text: "(필수) 개인정보 처리방침", url: "privacyPolicy" },
       ],
       form: {
+        schoolId: null,
         name: "",
         role: null,
         studentid: "",
@@ -193,7 +216,18 @@ export default {
       }
     },
   },
-
+  created() {
+    getSchools().then((res) => {
+      if (res.status) {
+        res.result.forEach((school) => {
+          this.schoolOptions.push({
+            value: school.id,
+            text: school.name,
+          });
+        });
+      }
+    });
+  },
   metaInfo: {
     meta: [
       { name: "theme-color", content: "#ecf5ff" },
@@ -201,7 +235,6 @@ export default {
       { name: "apple-mobile-web-app-status-bar-style", content: "#ecf5ff" },
     ],
   },
-
   methods: {
     checkValidKey(role) {
       console.log(role);
@@ -276,8 +309,8 @@ export default {
     },
     sendRequest() {
       console.log("clicked");
-
       const data = {
+        schoolId: this.form.schoolId,
         name: this.form.name,
         uid: this.form.uid,
         password: createHash("sha256")
@@ -287,14 +320,15 @@ export default {
         email: this.form.email,
         gID: this.form.gID,
         aID: this.form.aID,
-        tel: this.form.tel,
+        tel: this.form.tel.replace(/-/g, ""),
         role: this.form.role,
       };
-      console.log(data);
       register(data)
         .then((res) => {
           if (res.status == true) {
-            alert("회원가입이 완료되었습니다. 로그인을 진행해주세요.");
+            alert(
+              "가입 요청이 처리되었습니다. 매점 담당 선생님께 승인을 요청하세요."
+            );
             this.$router.push({ path: "/login" });
           } else {
             alert("이미 존재하는 아이디입니다.");

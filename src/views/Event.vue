@@ -9,7 +9,7 @@
       :columns="columns"
       :data="data"
       :detail-key="table.detailKey"
-      :checkable="false"
+      checkable
       :page="table.page"
     >
       <template v-slot:detail="props">

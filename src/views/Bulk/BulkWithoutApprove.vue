@@ -3,7 +3,11 @@
 </template>
 <script>
 import BulkForm from "./BulkForm.vue";
-import { bulkRequest, bulkRequestWithExcel } from "@/networking/bulk";
+import {
+  bulkRequest,
+  bulkRequestWithExcel,
+  approveRequest,
+} from "@/networking/bulk";
 export default {
   components: {
     BulkForm,
@@ -14,8 +18,8 @@ export default {
 
       bulkRequest(data)
         .then((res) => {
-          if (res.status == 200 && res.status) {
-            this.approveDirectly(res.id);
+          if (res.status) {
+            this.approveDirectly(res.result.id);
           } else {
             alert(res.message);
             this.$router.push("/gift");

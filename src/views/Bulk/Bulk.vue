@@ -11,6 +11,7 @@ export default {
   methods: {
     submit(data) {
       console.log("non-excel");
+      console.log(data);
       bulkRequest(data)
         .then((res) => {
           if (res.status == 200 && res.status) {
@@ -34,7 +35,7 @@ export default {
         bulkRequestWithExcel(data)
           .then((res) => {
             console.log(res);
-            if (res.status == true) {
+            if (res.status) {
               alert("제출이 완료되었습니다. 빠른 시일 내에 답변드리겠습니다.");
               this.$router.push("/gift");
             } else {

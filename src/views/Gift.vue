@@ -171,52 +171,17 @@ export default {
       }
       if (this.selectedStart != null && this.selectedEnd != null) {
         this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
-        console.log(this.selectedStart.toISOString());
-        console.log(this.selectedEnd.toISOString());
-        console.log("날짜 범위 있음");
-        // 날짜 범위 있음
-        if (this.uidfrom != null || this.uidto != null) {
-          console.log("ID 있음");
-          // ID중 하나라도 비어있지 않으면
-          data = {
-            type: "all",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
-            uidfrom: this.uidfrom,
-            uidto: this.uidto,
-          };
-        } else {
-          console.log("ID 없음");
-
-          // 모두 다 비어있으면
-          data = {
-            type: "date",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        console.log("날짜 범위 없음");
-
-        // 날짜 범위 없음
-        if (this.uidfrom != null || this.uidto != null) {
-          data = {
-            type: "uid",
-            uidfrom: this.uidfrom,
-            uidto: this.uidto,
-          };
-          // ID중 하나라도 비어있지 않으면
-          console.log("ID 있음");
-        } else {
-          // 모두 다 비어있으면
-          data = {
-            type: "null",
-          };
-          console.log("ID 없음");
-        }
       }
-      console.log(data);
-      getGifts(data).then((giftRes) => {
+      getGifts({
+        dateFrom:
+          this.selectedStart != null
+            ? this.selectedStart.toISOString()
+            : undefined,
+        dateTo:
+          this.selectedEnd != null ? this.selectedEnd.toISOString() : undefined,
+        uidFrom: this.uidfrom,
+        uidTo: this.uidto,
+      }).then((giftRes) => {
         if (giftRes.status) {
           this.data = giftRes.result;
           console.log(this.isMassiveGift);

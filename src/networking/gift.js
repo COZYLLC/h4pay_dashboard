@@ -1,16 +1,16 @@
 import {getService} from "./H4PayService"
-const baseUrl = process.env.VUE_APP_API_URL
+const baseUrl = process.env.VUE_APP_API_URL + "/gifts"
 
 function getGifts(data) {
-  return getService().post(`${baseUrl}/gift/filter`, data)
+  return getService().get(`${baseUrl}/filter`, data)
 }
 
-function exchangeGift() {
-  return getService().post(`${baseUrl}/gift/exchange`)
+function exchangeGift(data) {
+  return getService().post(`${baseUrl}/exchange`, data)
 }
 
 function extendGift(orderId) {
-  return getService().post(`${baseUrl}/gift/${orderId}/extend`)
+  return getService().post(`${baseUrl}/${orderId}/extend`)
 }
 
 export {getGifts, exchangeGift, extendGift}

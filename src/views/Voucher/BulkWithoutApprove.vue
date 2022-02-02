@@ -33,7 +33,7 @@ export default {
           .then((res) => {
             console.log(res);
             if (res.status) {
-              this.approveDirectly(res.result);
+              this.approveDirectly(res.result.id);
             } else {
               this.$buefy.notification.open({
                 message:

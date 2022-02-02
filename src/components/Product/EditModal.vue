@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: auto">
+    <div class="modal-card" style="width: 600px">
       <header class="modal-card-head">
         <p class="modal-card-title">
           {{ title }}
@@ -25,8 +25,9 @@
           <b-input v-model="product.desc" />
         </b-field>
         <b-field label="이미지 업로드">
+          * 이미지를 업로드 하지 않으면 기존의 이미지를 사용합니다.
           <b-upload
-            v-if="selectedFile == null"
+            v-if="selectedFile == null && !loaded"
             v-model="selectedFile"
             drag-drop
             accept="image/*"
@@ -46,7 +47,7 @@
           <section class="cropper-area">
             <div class="img-cropper">
               <vue-cropper
-                v-if="selectedFile != null"
+                v-show="selectedFile != null || loaded"
                 ref="cropper"
                 :aspect-ratio="1"
                 :src="imgSrc"
@@ -116,9 +117,13 @@ export default {
       this.product = this.productToModify;
     }
   },
+  mounted() {
+    if (this.type == "modify") this.setImageFromUri(this.productToModify.img);
+  },
   methods: {
     deleteImage() {
       this.selectedFile = null;
+      this.currentImage = null;
       this.$refs.cropper.destroy();
     },
     processResult(res) {
@@ -126,7 +131,7 @@ export default {
         notification
           .show(this, `제품 정보 처리에 성공했습니다.`, "is-success", 2500)
           .then((_) => {
-            this.$router.push("/");
+            this.$router.push("/product");
           });
       } else {
         this.$buefy.notification.open({
@@ -137,35 +142,40 @@ export default {
       }
     },
     submit() {
-      this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-        const file = new File(
-          [blob],
-          inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
-        );
-        const formData = new FormData();
-        formData.append("productName", this.product.productName);
-        formData.append("barcode", this.product.barcode);
-        formData.append("price", this.product.price);
-        formData.append("file", file);
-        if (this.type == "add") {
-          formData.append("desc", this.product.desc);
-          formData.append("soldout", this.product.soldout);
-          addProduct(formData).then((res) => {
-            this.processResult(res);
-          });
-        } else if (this.type == "modify") {
-          formData.append("target", this.product.id);
-          formData.append(
-            "desc",
-            this.product.desc != null ? this.product.desc : ""
+      if (this.selectedFile != null || this.type == "modify")
+        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
+          const file = new File(
+            [blob],
+            inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
           );
-          formData.append("img", this.product.img);
-          formData.append("soldout", !this.product.soldout);
-          modifyProduct(formData).then((res) => {
-            this.processResult(res);
-          });
-        }
-      });
+          this.sendRequest(file);
+        });
+      else this.sendRequest(null);
+    },
+    sendRequest(file) {
+      const formData = new FormData();
+      formData.append("productName", this.product.productName);
+      formData.append("barcode", this.product.barcode);
+      formData.append("price", this.product.price);
+      if (file != null) formData.append("file", file);
+      if (this.type == "add") {
+        formData.append("desc", this.product.desc);
+        formData.append("soldout", this.product.soldout);
+        addProduct(formData).then((res) => {
+          this.processResult(res);
+        });
+      } else if (this.type == "modify") {
+        formData.append("target", this.product.id);
+        formData.append(
+          "desc",
+          this.product.desc != null ? this.product.desc : ""
+        );
+        formData.append("img", this.product.img);
+        formData.append("soldout", !this.product.soldout);
+        modifyProduct(formData).then((res) => {
+          this.processResult(res);
+        });
+      }
     },
     setImage() {
       const file = this.selectedFile;
@@ -186,6 +196,13 @@ export default {
       } else {
         alert("Sorry, FileReader API not supported");
       }
+    },
+    setImageFromUri(uri) {
+      this.loaded = true;
+      this.imgSrc = uri;
+      // rebuild cropperjs with the updated source
+      console.log(this.$refs.cropper);
+      this.$refs.cropper.replace(uri);
     },
   },
 };

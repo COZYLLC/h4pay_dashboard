@@ -36,4 +36,4 @@ function getMask(phoneNumber) {
   return res;
 }
 
-export {getMask}
+export { getMask };

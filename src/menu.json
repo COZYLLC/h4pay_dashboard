@@ -1,5 +1,16 @@
 [
     {
+        "title": "공지사항",
+        "icon": "exclamation-circle",
+        "route": "/notice",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
         "title": "이벤트",
         "icon": "rocket",
         "route": "/event",
@@ -29,7 +40,7 @@
         "expanded": false,
         "children": [
             {
-                "title": "조회",
+                "title": "대량선물 발행 조회",
                 "icon": "search",
                 "route": "",
                 "role": [
@@ -38,7 +49,7 @@
                 ]
             },
             {
-                "title": "대량선물 요청",
+                "title": "상품 대량선물",
                 "icon": "thumbs-up",
                 "route": "bulk",
                 "role": [
@@ -49,7 +60,7 @@
                 ]
             },
             {
-                "title": "무승인 대량선물",
+                "title": "무승인 상품 대량선물",
                 "icon": "scroll",
                 "route": "bulk/noapprove",
                 "role": [
@@ -58,7 +69,7 @@
                 ]
             },
             {
-                "title": "대량선물 기록/요청",
+                "title": "대량선물 승인",
                 "icon": "clipboard-list",
                 "route": "bulk/lookup",
                 "role": [
@@ -83,6 +94,15 @@
         ],
         "children": [
             {
+                "title": "상품권 발행 조회",
+                "icon": "clipboard-list",
+                "route": "log/publish",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
                 "title": "상품권 대량선물",
                 "icon": "thumbs-up",
                 "route": "bulk",
@@ -102,18 +122,9 @@
                 ]
             },
             {
-                "title": "상품권 발행 요청 승인",
+                "title": "상품권 발행 승인",
                 "icon": "pen-nib",
                 "route": "log/request",
-                "role": [
-                    "SA",
-                    "AT"
-                ]
-            },
-            {
-                "title": "상품권 발행 내역",
-                "icon": "clipboard-list",
-                "route": "log/publish",
                 "role": [
                     "SA",
                     "AT"

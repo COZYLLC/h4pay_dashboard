@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: auto">
+    <div class="modal-card" style="width: 600px">
       <header class="modal-card-head">
         <p class="modal-card-title">
           {{ title }}
@@ -19,7 +19,7 @@
           <b-input v-model="event.amount" type="number" />
         </b-field>
         <b-field label="시작 일시">
-          <b-datepicker v-model="startDate" :mobile-native="false">
+          <b-datepicker v-model="event.start" :mobile-native="false">
             <template v-slot:trigger>
               <b-button icon-left="calendar" type="is-primary" />
             </template>
@@ -27,7 +27,7 @@
           <b-input expanded readonly :value="startString" />
         </b-field>
         <b-field label="종료 일시">
-          <b-datepicker v-model="endDate" :mobile-native="false">
+          <b-datepicker v-model="event.end" :mobile-native="false">
             <template v-slot:trigger>
               <b-button icon-left="calendar" type="is-primary" />
             </template>
@@ -39,7 +39,7 @@
         </b-field>
         <b-field label="사진 업로드">
           <b-upload
-            v-if="selectedFile == null"
+            v-if="selectedFile == null && !loaded"
             v-model="selectedFile"
             drag-drop
             accept="image/jpeg, image/png, image/gif"
@@ -59,7 +59,7 @@
           <section class="cropper-area">
             <div class="img-cropper">
               <vue-cropper
-                v-if="selectedFile != null"
+                v-show="selectedFile != null || loaded"
                 ref="cropper"
                 :aspect-ratio="2.4"
                 :src="imgSrc"
@@ -75,7 +75,11 @@
       </section>
       <footer class="modal-card-foot">
         <b-button label="닫기" @click="$emit('close')" />
-        <b-button label="추가" type="is-primary" @click="submit" />
+        <b-button
+          :label="type == 'add' ? '추가' : '변경'"
+          type="is-primary"
+          @click="submit"
+        />
       </footer>
     </div>
   </form>
@@ -87,7 +91,7 @@ let inko = new Inko();
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
 import { addEvent, modifyEvent } from "../../networking/event";
-
+import notification from "@/js/notification";
 export default {
   components: {
     VueCropper,
@@ -106,6 +110,7 @@ export default {
         end: null,
         totalqty: null,
       },
+      loaded: false,
       compkey: 0,
     };
   },
@@ -132,8 +137,12 @@ export default {
       this.event = this.eventToModify;
     }
   },
+  mounted() {
+    if (this.type == "modify") this.setImageFromUri(this.eventToModify.img);
+  },
   methods: {
     deleteImage() {
+      this.selectedFile = null;
       this.currentImage = null;
       this.$refs.cropper.destroy();
     },
@@ -143,7 +152,7 @@ export default {
         notification
           .show(this, "이벤트 처리에 성공했습니다.", "is-success", 2500)
           .then((_) => {
-            this.$router.push("/");
+            this.$router.push("/event");
           });
       } else {
         notification
@@ -154,34 +163,39 @@ export default {
             2500
           )
           .then((_) => {
-            this.$router.push("/");
+            this.$router.push("/event");
           });
       }
     },
     submit() {
+      if (this.selectedFile != null || this.type == "modify")
+        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
+          const file = new File(
+            [blob],
+            inko.ko2en(this.event.name) + `.${blob.type.split("/")[1]}`
+          );
+          this.sendRequest(file);
+        });
+      else this.sendRequest(null);
+    },
+    sendRequest(file) {
       const formData = new FormData();
-      this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-        const file = new File(
-          [blob],
-          inko.ko2en(this.event.name) + `.${blob.type.split("/")[1]}`
-        );
-        formData.append("file", file);
-        formData.append("name", this.event.name);
-        formData.append("desc", this.event.desc);
-        formData.append("start", this.event.start);
-        formData.append("end", this.event.end);
-        formData.append("totalqty", this.event.totalqty);
-        formData.append("amount", this.event.amount);
-        if (this.type == "add") {
-          addEvent(formData).then((res) => {
-            this.processResult(res);
-          });
-        } else {
-          modifyEvent(this.event.id, formData).then((res) => {
-            this.processResult(res);
-          });
-        }
-      });
+      if (file != null) formData.append("file", file);
+      formData.append("name", this.event.name);
+      formData.append("desc", this.event.desc);
+      formData.append("start", this.event.start.toISOString());
+      formData.append("end", this.event.end.toISOString());
+      formData.append("totalqty", this.event.totalqty);
+      formData.append("amount", this.event.amount);
+      if (this.type == "add") {
+        addEvent(formData).then((res) => {
+          this.processResult(res);
+        });
+      } else {
+        modifyEvent(this.event.id, formData).then((res) => {
+          this.processResult(res);
+        });
+      }
     },
     setImage() {
       const file = this.selectedFile;
@@ -202,6 +216,13 @@ export default {
       } else {
         alert("Sorry, FileReader API not supported");
       }
+    },
+    setImageFromUri(uri) {
+      this.loaded = true;
+      this.imgSrc = uri;
+      // rebuild cropperjs with the updated source
+      console.log(this.$refs.cropper);
+      this.$refs.cropper.replace(uri);
     },
   },
 };

@@ -46,7 +46,7 @@ export default {
         notification
           .show(this, "대량선물 승인에 실패했습니다.", "is-danger", 2500)
           .then((_) => {
-            this.$router.push("/");
+            this.$router.push("/gift/bulk/lookup");
           });
         return;
       }

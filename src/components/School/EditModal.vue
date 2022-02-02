@@ -121,9 +121,9 @@ export default {
           this.processResult(res);
         });
       } else if (this.type == "modify") {
-        modifySchool(this.school).then((res) => {
+        /*     modifySchool(this.school).then((res) => {
           this.processResult(res);
-        });
+        }); */
       }
     },
   },

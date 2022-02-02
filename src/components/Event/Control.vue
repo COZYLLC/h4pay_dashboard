@@ -56,7 +56,7 @@ export default {
   },
   methods: {
     showModal(type) {
-      this.title = type == "add" ? "이벤트 추가" : "이벤트 정보 변경 변경";
+      this.title = type == "add" ? "이벤트 추가" : "이벤트 정보 변경";
       this.type = type;
       if (type == "modify") {
         this.event = this.checkedRows[0];

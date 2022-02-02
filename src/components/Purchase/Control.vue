@@ -82,7 +82,7 @@ export default {
             2500
           )
           .then((_) => {
-            this.$router.push("/");
+            this.$router.push("/" + this.type);
           });
       });
     },
@@ -97,7 +97,7 @@ export default {
               2500
             )
             .then((_) => {
-              this.$router.push("/");
+              this.$router.push("/" + this.type);
             });
         });
       }

@@ -61,7 +61,7 @@ export default {
                 duration: 2000,
               });
               setTimeout(() => {
-                this.$router.push("/");
+                this.$router.push("/school");
               }, 2000);
             } else {
               this.$buefy.notification.open({

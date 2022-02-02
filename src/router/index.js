@@ -1,25 +1,28 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
-import Order from '@/views/Order'
-import Gift from '@/views/Gift'
-import Bulk from '@/views/Bulk/Bulk'
-import BulkReq from '@/views/Bulk/BulkReq'
-import BulkWithoutApprove from '@/views/Bulk/BulkWithoutApprove'
-import Event from '@/views/Event'
-import Product from '@/views/Product'
-import Login from "@/views/Login"
-import Register from "@/views/Register"
-import Success from '@/views/Success'
-import Admin from "@/views/Admin"
-import School from "@/views/School"
-import SchoolPwChanger from "@/views/SchoolPwChanger"
+import Order from "@/views/Order";
+import Gift from "@/views/Gift";
+import Bulk from "@/views/Bulk/Bulk";
+import BulkReq from "@/views/Bulk/BulkReq";
+import BulkWithoutApprove from "@/views/Bulk/BulkWithoutApprove";
+import Event from "@/views/Event";
+import Product from "@/views/Product";
+import Login from "@/views/Login";
+import Register from "@/views/Register";
+import Success from "@/views/Success";
+import Admin from "@/views/Admin";
+import School from "@/views/School";
+import SchoolPwChanger from "@/views/SchoolPwChanger";
 
 //Voucher
-import VoucherBulk from "@/views/Voucher/Bulk.vue"
-import VoucherBulkWithoutApprove from "@/views/Voucher/BulkWithoutApprove.vue"
-import PublishLog from "@/views/Voucher/log_publish.vue"
-import VoucherRequest from "@/views/Voucher/BulkReq.vue"
+import VoucherBulk from "@/views/Voucher/Bulk.vue";
+import VoucherBulkWithoutApprove from "@/views/Voucher/BulkWithoutApprove.vue";
+import PublishLog from "@/views/Voucher/log_publish.vue";
+import VoucherRequest from "@/views/Voucher/BulkReq.vue";
+import Notice from "@/views/Notice.vue";
+
+import Contract from "@/views/Contract/Contract.vue";
 
 Vue.use(VueRouter);
 
@@ -27,12 +30,12 @@ const voucherRoutes = [
   {
     path: "/voucher/bulk",
     name: "VoucherBulk",
-    component: VoucherBulk
+    component: VoucherBulk,
   },
   {
     path: "/voucher/bulk/noapprove",
     name: "VoucherBulkWithoutApprove",
-    component: VoucherBulkWithoutApprove
+    component: VoucherBulkWithoutApprove,
   },
   {
     path: "/voucher/log/publish",
@@ -42,9 +45,9 @@ const voucherRoutes = [
   {
     path: "/voucher/log/request",
     name: "VoucherRequest",
-    component: VoucherRequest
-  }
-]
+    component: VoucherRequest,
+  },
+];
 
 const routes = [
   ...voucherRoutes,
@@ -93,24 +96,24 @@ const routes = [
     name: "Login",
     component: Login,
     meta: {
-      hideNavigation: true
-    }
+      hideNavigation: true,
+    },
   },
   {
     path: "/register",
     name: "Register",
     component: Register,
     meta: {
-      hideNavigation: true
-    }
+      hideNavigation: true,
+    },
   },
   {
     path: "/success",
     name: "Success",
     component: Success,
     meta: {
-      hideNavigation: true
-    }
+      hideNavigation: true,
+    },
   },
   {
     path: "/admin",
@@ -123,14 +126,28 @@ const routes = [
     component: School,
   },
   {
-    path:"/school/init/:token",
+    path: "/notice",
+    name: "Notice",
+    component: Notice,
+  },
+  {
+    path: "/school/init/:token",
     name: "SchoolPwChanger",
     component: SchoolPwChanger,
-    props:true,
+    props: true,
     meta: {
-      hideNavigation:true
-    }
-  }
+      hideNavigation: true,
+    },
+  },
+  {
+    path: "/contract/:token",
+    name: "ContractForm",
+    component: Contract,
+    props: true,
+    meta: {
+      hideNavigation: true,
+    },
+  },
 ];
 
 const router = new VueRouter({

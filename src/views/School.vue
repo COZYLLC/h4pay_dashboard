@@ -5,10 +5,10 @@
       본 메뉴는 COZY 내부 관리를 위해 존재하며, 학교 관리가 가능합니다.
     </p>
     <b-field label="학교ID로 검색">
-      <b-input v-model="id" type="text"></b-input>
+      <b-input v-model="id" type="text" />
     </b-field>
     <b-field label="학교 이름으로 검색">
-      <b-input v-model="name" type="text"></b-input>
+      <b-input v-model="name" type="text" />
     </b-field>
     <b-button type="is-primary" @click="lookup">
       {{ id == null ? "전체 조회" : "조회" }}
@@ -81,7 +81,7 @@ export default {
           message: "권한이 없습니다.",
           type: "is-danger",
         });
-        this.$router.push("/");
+        this.$router.push("/school");
       }
     });
   },

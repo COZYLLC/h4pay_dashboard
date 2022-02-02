@@ -21,12 +21,29 @@ export default {
           if (res.status) {
             this.approveDirectly(res.result.id);
           } else {
-            alert(res.message);
-            this.$router.push("/gift");
+            notification
+              .show(
+                this,
+                `오류가 발생했습니다: ${res.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.push("/gift");
+              });
           }
         })
         .catch((err) => {
-          alert(`오류가 발생했습니다: ${err.message}`);
+          notification
+            .show(
+              this,
+              `오류가 발생했습니다: ${err.response.message}`,
+              "is-danger",
+              2500
+            )
+            .then((_) => {
+              this.$router.push("/gift");
+            });
           this.$router.push("/gift");
         });
     },
@@ -44,14 +61,32 @@ export default {
         })
           .then((res) => {
             console.log(res);
-            if (res.status == true && res.id != null) {
-              this.approveDirectly(res.id);
+            if (res.status && res.result.id != null) {
+              this.approveDirectly(res.result.id);
             } else {
-              alert(res.message);
+              notification
+                .show(
+                  this,
+                  `오류가 발생했습니다: ${res.message}`,
+                  "is-danger",
+                  2500
+                )
+                .then((_) => {
+                  this.$router.push("/gift");
+                });
             }
           })
-          .catch((error) => {
-            alert(error.status);
+          .catch((err) => {
+            notification
+              .show(
+                this,
+                `오류가 발생했습니다: ${err.response.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.push("/gift");
+              });
           });
       }
     },

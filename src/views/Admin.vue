@@ -73,7 +73,7 @@ export default {
           message: "권한이 없습니다.",
           type: "is-danger",
         });
-        this.$router.push("/");
+        this.$router.push("/admin");
       }
     });
   },

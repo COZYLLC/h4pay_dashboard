@@ -60,7 +60,7 @@
     </b-step-item>
     <b-step-item step="4" label="학생 명단 업로드" icon="upload">
       <b-field label="엑셀 파일 업로드">
-        <b-upload v-model="requestData.file" drag-drop>
+        <b-upload v-model="requestData.file" drag-drop accept=".xls,.xlsx">
           <section class="section">
             <div class="content has-text-centered">
               <p>

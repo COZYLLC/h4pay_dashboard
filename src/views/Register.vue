@@ -27,11 +27,8 @@
           </option>
         </b-select>
       </b-field>
-      <b-field label="인증코드" horizontal>
-        <b-input v-model="form.code" type="text" />
-      </b-field>
-      <b-field label="아이디" :type="isValid(idState)" horizontal>
-        <b-input v-model="form.uid" type="text" />
+      <b-field label="이메일" :type="isValid(emailState)" horizontal>
+        <b-input v-model="form.email" type="email" />
       </b-field>
       <b-field label="비밀번호" :type="isValid(pwState)" horizontal>
         <b-input v-model="form.password" type="password" password-reveal>
@@ -40,9 +37,6 @@
       <b-field label="비밀번호 재입력" :type="isValid(pw2State)" horizontal>
         <b-input v-model="form.password2" type="password" password-reveal>
         </b-input>
-      </b-field>
-      <b-field label="이메일" :type="isValid(emailState)" horizontal>
-        <b-input v-model="form.email" type="email" />
       </b-field>
       <b-field label="전화번호" :type="isValid(telState)" horizontal>
         <b-input
@@ -96,7 +90,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { createHash } from "crypto";
 import { register } from "../networking/users";
 import { getSchools } from "../networking/school";

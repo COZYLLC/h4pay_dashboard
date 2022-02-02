@@ -1,13 +1,13 @@
 function showNoti(vue, message, type, duration) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     vue.$buefy.notification.open({
       message,
-       type,
+      type,
       duration,
       progressBar: true,
-     });
-     setTimeout(resolve, duration)
-  })
+    });
+    setTimeout(resolve, duration);
+  });
 }
 
 module.exports.show = showNoti;

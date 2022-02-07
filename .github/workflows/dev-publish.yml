@@ -25,7 +25,7 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.H4PAY_HOST }}
+        host: ${{ secrets.H4PAY_HOST_DEV }}
         username: ${{ secrets.H4PAY_USERNAME }}
         password: ${{ secrets.H4PAY_PASSWORD }}
         port: ${{ secrets.H4PAY_PORT }} # default : 22

@@ -56,6 +56,9 @@
         <template v-else-if="column.field == 'issuer'">
           {{ props.row.issuer.uid }}
         </template>
+        <template v-else-if="column.field == 'role'">
+          {{ getRole(props.row.role) }}
+        </template>
         <template v-else-if="column.field == 'receiver'">
           {{ props.row.receiver.name }} / {{ props.row.receiver.tel }}
         </template>
@@ -87,6 +90,7 @@
 </template>
 
 <script>
+import { roleCharToKorean } from "@/js/role";
 export default {
   props: ["type", "detailKey", "products", "columns", "data", "checkable"],
 
@@ -117,6 +121,9 @@ export default {
     }
   },
   methods: {
+    getRole(role) {
+      return roleCharToKorean(role);
+    },
     onPageChange(page) {
       this.$router.replace({ query: { page: page } });
     },

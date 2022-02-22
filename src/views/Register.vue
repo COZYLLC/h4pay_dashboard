@@ -305,7 +305,7 @@ export default {
       const data = {
         schoolId: this.form.schoolId,
         name: this.form.name,
-        uid: this.form.uid,
+        uid: this.form.email.split("@")[0],
         password: createHash("sha256")
           .update(this.form.password)
           .digest("base64"),
@@ -318,6 +318,7 @@ export default {
       };
       register(data)
         .then((res) => {
+          console.log(res);
           if (res.status == true) {
             alert(
               "가입 요청이 처리되었습니다. 매점 담당 선생님께 승인을 요청하세요."
@@ -342,17 +343,12 @@ export default {
         this.emailState &&
         this.pwState &&
         this.pw2State &&
-        this.idState &&
         this.roleState &&
         this.nameState
       ) {
         if (this.checkState) {
-          if (this.codeState) {
-            this.form.studentid == null;
-            this.sendRequest();
-          } else {
-            alert("올바른 선생님 인증 코드를 입력해주세요!");
-          }
+          this.form.studentid == null;
+          this.sendRequest();
         } else {
           alert("약관에 모두 동의해주세요!");
         }

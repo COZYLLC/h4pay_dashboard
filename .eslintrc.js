@@ -1,24 +1,27 @@
+// https://eslint.org/docs/user-guide/configuring
 module.exports = {
     root: true,
     parserOptions: {
-        parser: 'babel-eslint',
+      parser: "babel-eslint",
+      sourceType: 'module'
     },
     env: {
-        browser: true,
+      browser: true,
     },
+    // https://github.com/standard/standard/blob/master/docs/RULES-en.md
     extends: [
-        'plugin:vue/recommended',
+      "plugin:vue/recommended",
+      'prettier',
+      'plugin:prettier/recommended',
     ],
     plugins: [
-        'vue',
+      "vue", "prettier"
     ],
+    // add your custom rules here
     rules: {
-        'vue/html-self-closing': 'off',
-        'vue/max-attributes-per-line': 'off',
-        'nenerator-start-spacing': 'off',
-        'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-        'no-unsafe-finally': 0,
-        'no-return-assign': 0,
-        'keyword-spacing': ['error', { before: true, after: true }],
-    },
-};
+      // allow async-await
+      'generator-star-spacing': 'off',
+      // allow debugger during development
+      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    }
+  }

@@ -1,5 +1,16 @@
 [
     {
+        "title": "공지사항",
+        "icon": "exclamation-circle",
+        "route": "/notice",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
         "title": "이벤트",
         "icon": "rocket",
         "route": "/event",
@@ -29,7 +40,7 @@
         "expanded": false,
         "children": [
             {
-                "title": "조회",
+                "title": "대량선물 발행 조회",
                 "icon": "search",
                 "route": "",
                 "role": [
@@ -38,8 +49,8 @@
                 ]
             },
             {
-                "title": "대량선물 요청",
-                "icon": "paper-plane",
+                "title": "상품 대량선물",
+                "icon": "thumbs-up",
                 "route": "bulk",
                 "role": [
                     "SA",
@@ -49,22 +60,22 @@
                 ]
             },
             {
-                "title": "대량선물 조회 및 승인",
+                "title": "무승인 상품 대량선물",
                 "icon": "scroll",
+                "route": "bulk/noapprove",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
+                "title": "대량선물 승인",
+                "icon": "clipboard-list",
                 "route": "bulk/lookup",
                 "role": [
                     "SA",
                     "A",
                     "T",
-                    "AT"
-                ]
-            },
-            {
-                "title": "무승인 대량선물",
-                "icon": "scroll",
-                "route": "bulk/noapprove",
-                "role": [
-                    "SA",
                     "AT"
                 ]
             }
@@ -83,8 +94,17 @@
         ],
         "children": [
             {
+                "title": "상품권 발행 조회",
+                "icon": "clipboard-list",
+                "route": "log/publish",
+                "role": [
+                    "SA",
+                    "AT"
+                ]
+            },
+            {
                 "title": "상품권 대량선물",
-                "icon": "paper-plane",
+                "icon": "thumbs-up",
                 "route": "bulk",
                 "role": [
                     "SA",
@@ -102,18 +122,9 @@
                 ]
             },
             {
-                "title": "상품권 발행 요청 승인",
+                "title": "상품권 발행 승인",
                 "icon": "pen-nib",
                 "route": "log/request",
-                "role": [
-                    "SA",
-                    "AT"
-                ]
-            },
-            {
-                "title": "상품권 발행 내역",
-                "icon": "pen-nib",
-                "route": "log/publish",
                 "role": [
                     "SA",
                     "AT"
@@ -131,6 +142,27 @@
             "SA",
             "S",
             "AT"
+        ]
+    },
+    {
+        "title": "관리자 관리",
+        "icon": "user",
+        "route": "/admin",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA",
+            "AT"
+        ]
+    },
+    {
+        "title": "학교 관리",
+        "icon": "school",
+        "route": "/school",
+        "active": false,
+        "expanded": false,
+        "role": [
+            "SA"
         ]
     },
     {

@@ -1,8 +1,10 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: auto">
+    <div class="modal-card" style="width: 600px">
       <header class="modal-card-head">
-        <p class="modal-card-title">이벤트 추가</p>
+        <p class="modal-card-title">
+          {{ title }}
+        </p>
 
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
@@ -35,145 +37,113 @@
         <b-field label="총 수량">
           <b-input v-model="event.totalqty" />
         </b-field>
-        <b-field label="사진 업로드">
-          <b-upload
-            v-if="selectedFile == null"
-            v-model="selectedFile"
-            drag-drop
-            accept="image/jpeg, image/png, image/gif"
-            @input="setImage"
-          >
-            <section class="section">
-              <div class="content has-text-centered">
-                <p>
-                  <b-icon icon="upload" size="is-large"> </b-icon>
-                </p>
-                <p>파일을 선택하거나 드래그하세요</p>
-              </div>
-            </section>
-          </b-upload>
-        </b-field>
-        <div class="content">
-          <section class="cropper-area">
-            <div class="img-cropper">
-              <vue-cropper
-                v-if="selectedFile != null"
-                ref="cropper"
-                :aspect-ratio="2.4"
-                :src="imgSrc"
-              />
-            </div>
-            <div id="cancel" v-if="imgSrc != null">
-              <b-button class="is-danger" @click="deleteImage"
-                >사진 제거</b-button
-              >
-            </div>
-          </section>
-        </div>
+        <upload-cropper
+          ref="upload-cropper"
+          :init-img="event.img"
+          :name="event.name"
+          @onImageCropped="sendRequest"
+        ></upload-cropper>
       </section>
       <footer class="modal-card-foot">
         <b-button label="닫기" @click="$emit('close')" />
-        <b-button label="추가" @click="submit" type="is-primary" />
+        <b-button
+          :label="type == 'add' ? '추가' : '변경'"
+          type="is-primary"
+          @click="submit"
+        />
       </footer>
     </div>
   </form>
 </template>
 
 <script>
-import Inko from "inko";
-let inko = new Inko();
-import VueCropper from "vue-cropperjs";
-import "cropperjs/dist/cropper.css";
-
+import { addEvent, modifyEvent } from "../../networking/event";
+import notification from "@/js/notification";
 export default {
-  components: {
-    VueCropper,
-  },
-  props: ["email", "password", "canCancel", "title", "type", "productToModify"],
+  props: ["email", "password", "canCancel", "title", "type", "eventToModify"],
   data() {
     return {
       selectedFile: null,
       imgSrc: "",
-      event: {},
+      event: {
+        id: null,
+        name: null,
+        desc: null,
+        amount: null,
+        start: null,
+        end: null,
+        totalqty: null,
+      },
+      loaded: false,
       compkey: 0,
     };
   },
-  methods: {
-    deleteImage() {
-      this.currentImage = null;
-      this.$refs.cropper.destroy();
-    },
-    processResult(res) {
-      console.log(res);
-      if (res.data.status) {
-        this.$buefy.notification.open({
-          message: "처리가 완료되었습니다.",
-          type: "is-primary",
-          duration: 1000,
-        });
-        this.$router.go();
-      } else {
-        this.$buefy.notification.open({
-          message: "처리에 실패했습니다.",
-          type: "is-danger",
-          duration: 1000,
-        });
-      }
-    },
-    submit() {
-      const formData = new FormData();
-      this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-        const file = new File(
-          [blob],
-          inko.ko2en(this.event.name) + `.${blob.type.split("/")[1]}`
-        );
-        formData.append("file", file);
-        formData.append("name", this.event.name);
-        formData.append("desc", this.event.desc);
-        formData.append("start", this.event.start);
-        formData.append("end", this.event.end);
-        formData.append("totalqty", this.event.totalqty);
-        formData.append("amount", this.event.amount);
-
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/event`, formData)
-          .then((res) => {
-            this.processResult(res);
-          });
-      });
-    },
-    setImage() {
-      const file = this.selectedFile;
-      console.log(file);
-      if (file.type.indexOf("image/") === -1) {
-        alert("Please select an image file");
-        return;
-      }
-      if (typeof FileReader === "function") {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          this.imgSrc = event.target.result;
-          // rebuild cropperjs with the updated source
-          console.log(this.$refs.cropper);
-          this.$refs.cropper.replace(event.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert("Sorry, FileReader API not supported");
-      }
-    },
-  },
   computed: {
     startString() {
-      return this.event.start ? this.event.start.toLocaleDateString() : "";
+      return this.event.start != null
+        ? this.event.start.toLocaleDateString()
+        : "";
     },
     endString() {
-      return this.event.end ? this.event.end.toLocaleDateString() : "";
+      return this.event.end != null ? this.event.end.toLocaleDateString() : "";
     },
     url() {
       return this.currentImage == null
         ? require("@/assets/logo.png")
         : URL.createObjectURL(this.currentImage);
+    },
+  },
+  created() {
+    if (this.type == "modify") {
+      this.eventToModify.start = new Date(this.eventToModify.start);
+      this.eventToModify.end = new Date(this.eventToModify.end);
+      console.log(this.eventToModify);
+      this.event = this.eventToModify;
+    }
+  },
+  methods: {
+    processResult(res) {
+      console.log(res);
+      if (res.status) {
+        notification
+          .show(this, "이벤트 처리에 성공했습니다.", "is-success", 2500)
+          .then((_) => {
+            this.$router.go(0);
+          });
+      } else {
+        notification
+          .show(
+            this,
+            `이벤트 처리에 실패했습니다: ${res.message}`,
+            "is-success",
+            2500
+          )
+          .then((_) => {
+            this.$router.go(0);
+          });
+      }
+    },
+    submit() {
+      this.$refs["upload-cropper"].getImageFile();
+    },
+    sendRequest(file) {
+      const formData = new FormData();
+      if (file != null) formData.append("file", file);
+      formData.append("name", this.event.name);
+      formData.append("desc", this.event.desc);
+      formData.append("start", this.event.start.toISOString());
+      formData.append("end", this.event.end.toISOString());
+      formData.append("totalqty", this.event.totalqty);
+      formData.append("amount", this.event.amount);
+      if (this.type == "add") {
+        addEvent(formData).then((res) => {
+          this.processResult(res);
+        });
+      } else {
+        modifyEvent(this.event.id, formData).then((res) => {
+          this.processResult(res);
+        });
+      }
     },
   },
 };

@@ -78,7 +78,15 @@ export default {
     this.$store.dispatch("loginCheckA").then(() => {
       if (
         this.$store.getters.getName == null ||
-        this.$store.getters.getRole == null
+        this.$store.getters.getRole == null ||
+        this.$store.getters.getSchoolId == null ||
+        this.$store.getters.getUid == null ||
+        this.$store.getters.getToken == null ||
+        this.$store.getters.getName == "" ||
+        this.$store.getters.getRole == "" ||
+        this.$store.getters.getSchoolId == "" ||
+        this.$store.getters.getUid == "" ||
+        this.$store.getters.getToken == ""
       ) {
         this.$router.push("/login");
       } else {

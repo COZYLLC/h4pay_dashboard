@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: auto">
+    <div class="modal-card" style="width: 600px">
       <header class="modal-card-head">
         <p class="modal-card-title">
           {{ title }}
@@ -24,42 +24,13 @@
         <b-field label="설명">
           <b-input v-model="product.desc" />
         </b-field>
-        <b-field label="이미지 업로드">
-          <b-upload
-            v-if="selectedFile == null"
-            v-model="selectedFile"
-            drag-drop
-            accept="image/*"
-            @input="setImage()"
-          >
-            <section class="section">
-              <div class="content has-text-centered">
-                <p>
-                  <b-icon icon="upload" size="is-large"> </b-icon>
-                </p>
-                <p>파일을 선택하거나 드래그하세요</p>
-              </div>
-            </section>
-          </b-upload>
-        </b-field>
-        <div class="content">
-          <section class="cropper-area">
-            <div class="img-cropper">
-              <vue-cropper
-                v-if="selectedFile != null"
-                ref="cropper"
-                :aspect-ratio="1"
-                :src="imgSrc"
-              />
-            </div>
-            <div v-if="imgSrc != null" id="cancel">
-              <b-button class="is-danger" @click="deleteImage">
-                사진 제거
-              </b-button>
-            </div>
-          </section>
-        </div>
-
+        <upload-cropper
+          ref="upload-cropper"
+          :init-img="product.img"
+          :name="product.productName"
+          :aspect-ratio="1"
+          @onImageCropped="sendRequest"
+        ></upload-cropper>
         <b-field label="품절 여부">
           <b-switch
             v-model="product.soldout"
@@ -83,20 +54,13 @@
 </template>
 
 <script>
-import Inko from "inko";
-let inko = new Inko();
-import VueCropper from "vue-cropperjs";
-import "cropperjs/dist/cropper.css";
+import { addProduct, modifyProduct } from "../../networking/product";
+import notification from "@/js/notification";
 
 export default {
-  components: {
-    VueCropper,
-  },
   props: ["email", "password", "canCancel", "title", "type", "productToModify"],
   data() {
     return {
-      selectedFile: null,
-      imgSrc: "",
       product: {
         id: null,
         productName: null,
@@ -110,24 +74,18 @@ export default {
     };
   },
   created() {
-    //this.image = this.$refs.image;
     if (this.type == "modify") {
       this.product = this.productToModify;
     }
   },
   methods: {
-    deleteImage() {
-      this.selectedFile = null;
-      this.$refs.cropper.destroy();
-    },
     processResult(res) {
-      if (res.data.status) {
-        this.$buefy.notification.open({
-          message: "처리가 완료되었습니다.",
-          type: "is-primary",
-          duration: 1000,
-        });
-        this.$router.go();
+      if (res.status) {
+        notification
+          .show(this, `제품 정보 처리에 성공했습니다.`, "is-success", 2500)
+          .then((_) => {
+            this.$router.go(0);
+          });
       } else {
         this.$buefy.notification.open({
           message: "처리에 실패했습니다.",
@@ -137,52 +95,31 @@ export default {
       }
     },
     submit() {
+      this.$refs["upload-cropper"].getImageFile();
+    },
+    sendRequest(file) {
+      const formData = new FormData();
+      formData.append("productName", this.product.productName);
+      formData.append("barcode", this.product.barcode);
+      formData.append("price", this.product.price);
+      if (file != null) formData.append("file", file);
       if (this.type == "add") {
-        const formData = new FormData();
-        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-          const file = new File(
-            [blob],
-            inko.ko2en(this.product.productName) + `.${blob.type.split("/")[1]}`
-          );
-          formData.append("file", file);
-          formData.append("productName", this.product.productName);
-          formData.append("barcode", this.product.barcode);
-          formData.append("price", this.product.price);
-          formData.append("desc", this.product.desc);
-          formData.append("soldout", this.product.soldout);
-          this.$axios
-            .post(`${process.env.VUE_APP_API_URL}/product/add`, formData)
-            .then((res) => {
-              this.processResult(res);
-            });
+        formData.append("desc", this.product.desc);
+        formData.append("soldout", this.product.soldout);
+        addProduct(formData).then((res) => {
+          this.processResult(res);
         });
       } else if (this.type == "modify") {
-        this.product.target = this.product.id;
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/product/modify`, this.product)
-          .then((res) => {
-            this.processResult(res);
-          });
-      }
-    },
-    setImage() {
-      const file = this.selectedFile;
-      console.log(file);
-      if (file.type.indexOf("image/") === -1) {
-        alert("Please select an image file");
-        return;
-      }
-      if (typeof FileReader === "function") {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          this.imgSrc = event.target.result;
-          // rebuild cropperjs with the updated source
-          console.log(this.$refs.cropper);
-          this.$refs.cropper.replace(event.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert("Sorry, FileReader API not supported");
+        formData.append("target", this.product.id);
+        formData.append(
+          "desc",
+          this.product.desc != null ? this.product.desc : ""
+        );
+        formData.append("img", this.product.img);
+        formData.append("soldout", !this.product.soldout);
+        modifyProduct(formData).then((res) => {
+          this.processResult(res);
+        });
       }
     },
   },

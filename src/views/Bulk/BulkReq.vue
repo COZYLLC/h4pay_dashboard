@@ -35,7 +35,7 @@
       :checkable="true"
     >
       <template v-slot:detail="props">
-        <BulkReqDetail :names="props.row.names" :targets="props.row.targets" />
+        <BulkReqDetail :targets="props.row.targets" :products="products" />
       </template>
       <template v-slot:control="props">
         <BulkReqControl type="gift" :checked-rows="props.checkedRows" />
@@ -51,6 +51,9 @@ import Table from "@/components/Table";
 import TableLoading from "../../components/TableLoading.vue";
 import BulkReqDetail from "@/components/BulkReq/Detail";
 import BulkReqControl from "@/components/BulkReq/Control";
+import dateUtil from "@/js/dateUtil.js";
+import { getBulkRequests } from "@/networking/bulk";
+import { getProducts } from "../../networking/product";
 
 export default {
   name: "Home",
@@ -88,14 +91,6 @@ export default {
           label: "요청 일시",
         },
         {
-          field: "product",
-          label: "요청 제품",
-        },
-        {
-          field: "qty",
-          label: "1인당 수량",
-        },
-        {
           field: "approved",
           label: "승인 여부",
         },
@@ -120,16 +115,14 @@ export default {
     },
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list.reverse();
-          if (this.$route.query.orderId != null) {
-            this.findRequest();
-          }
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result.reverse();
+        if (this.$route.query.orderId != null) {
+          this.findRequest();
         }
-      });
+      }
+    });
   },
   methods: {
     setCheckedRows(value) {
@@ -140,53 +133,38 @@ export default {
     },
     findRequest() {
       let data = {};
-      if (this.selectedStart != null && this.selectedEnd != null) {
-        // 날짜 범위 있음
-        if (this.id == "") {
-          // id가 비어 있으면
-          data = {
-            type: "date",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-          };
-        } else {
-          // 아니면
-          data = {
-            type: "all",
-            start: this.selectedStart,
-            end: this.selectedEnd,
-            uid: this.id,
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        // 날짜 범위 없음
-        if (this.id == "") {
-          data = {
-            type: "null",
-          };
-        } else {
-          data = {
-            type: "uid",
-            uid: this.id,
-          };
-        }
-      }
       console.log(data);
-      this.loaded = true;
-      this.$axios
-        .get(`${process.env.VUE_APP_API_URL}/bulk/request/`)
-        .then((requestRes) => {
-          console.log(requestRes);
-          if (requestRes.data.status) {
-            this.data = requestRes.data.result;
-            this.loaded = true;
-            this.$buefy.notification.open({
-              message: "조회에 성공했습니다!",
-              type: "is-primary",
-              duration: 1000,
-            });
-          }
-        });
+      if (this.selectedEnd != null) {
+        this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
+      }
+      getBulkRequests({
+        dateFrom:
+          this.selectedStart != null
+            ? this.selectedStart.toISOString()
+            : undefined,
+        dateTo:
+          this.selectedEnd != null ? this.selectedEnd.toISOString() : undefined,
+        issuer: this.id || undefined,
+        amountMin: this.amountMin || undefined,
+        amountMax: this.amountMax || undefined,
+      }).then((res) => {
+        console.log(res);
+        if (res.status) {
+          this.data = res.result;
+          this.loaded = true;
+          this.$buefy.notification.open({
+            message: "조회에 성공했습니다!",
+            type: "is-primary",
+            duration: 1000,
+          });
+        } else {
+          this.$buefy.notification.open({
+            message: `조회에 실패했습니다: ${res.message}`,
+            type: "is-danger",
+            duration: 2500,
+          });
+        }
+      });
     },
   },
 };

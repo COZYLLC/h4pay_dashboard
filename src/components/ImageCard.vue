@@ -3,7 +3,7 @@
     <div class="card">
       <div class="card-image">
         <figure class="image is-4by3">
-          <img :src="require('@/assets/notready.png')" alt="Placeholder image" />
+          <slot name="image"></slot>
         </figure>
       </div>
       <div class="card-content">
@@ -16,7 +16,6 @@
 </template>
 <script>
 export default {
-  props: ["img"],
   methods: {
     onClick() {
       this.$emit("click");

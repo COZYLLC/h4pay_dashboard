@@ -10,6 +10,10 @@
 
 <script>
 import BulkForm from "@/views/Voucher/BulkForm.vue";
+import {
+  issueVoucherRequest,
+  approveVoucherRequest,
+} from "@/networking/voucher";
 export default {
   components: {
     BulkForm,
@@ -25,54 +29,45 @@ export default {
         };
         formData.append("issuer", JSON.stringify(issuer));
 
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/voucher/request`, formData)
+        issueVoucherRequest(formData)
           .then((res) => {
             console.log(res);
-            if (res.status == 200) {
-              this.approveDirectly(res.data.id);
-            } else if (res.status == 500) {
+            if (res.status) {
+              this.approveDirectly(res.result.id);
+            } else {
               this.$buefy.notification.open({
                 message:
                   "선물에 실패했습니다. 서버 내부 오류입니다. 관리자에게 문의해주세요.",
                 type: "is-danger",
-                duration: 1500,
-              });
-            } else {
-              this.$buefy.notification.open({
-                message: "요청에 실패했습니다.",
-                type: "is-danger",
-                duration: 1000,
+                duration: 3000,
               });
             }
           })
           .catch((err) => {
+            console.log(err);
             this.$buefy.notification.open({
               message: `오류가 발생했습니다: ${err.message}`,
               type: "is-danger",
-              duration: 1000,
+              duration: 3000,
             });
           });
       });
     },
     approveDirectly(requestId) {
-      this.$axios
-        .post(
-          `${process.env.VUE_APP_API_URL}/voucher/request/${requestId}/approve`
-        )
+      approveVoucherRequest(requestId)
         .then((res) => {
-          if (res.status == 200 && res.data.status) {
+          if (res.status) {
             this.$buefy.notification.open({
               message: "상품권 발행 및 선물이 정상 처리되었습니다.",
               type: "is-success",
-              duration: 1000,
+              duration: 3000,
             });
             this.$router.push("/voucher/log/publish");
           } else {
             this.$buefy.notification.open({
               message: "요청에 실패했습니다.",
               type: "is-danger",
-              duration: 1000,
+              duration: 3000,
             });
           }
         })
@@ -80,7 +75,7 @@ export default {
           this.$buefy.notification.open({
             message: `오류가 발생했습니다: ${err.message}`,
             type: "is-danger",
-            duration: 1000,
+            duration: 3000,
           });
         });
     },

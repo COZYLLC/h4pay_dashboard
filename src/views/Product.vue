@@ -13,8 +13,8 @@
       :detail-key="table.detailKey"
       :checkable="true"
     >
-      <template v-slot:detail="row">
-        <ProductDetail :product="row" />
+      <template v-slot:detail="props">
+        <ProductDetail :product="props.row" />
       </template>
       <template v-slot:control="props">
         <ProductControl :checked-rows="props.checkedRows" />
@@ -30,6 +30,7 @@ import Table from "@/components/Table";
 import TableLoading from "@/components/TableLoading.vue";
 import ProductDetail from "@/components/Product/Detail.vue";
 import ProductControl from "@/components/Product/Control.vue";
+import { getVisibleProducts } from "../networking/product";
 export default {
   name: "Home",
   components: {
@@ -71,14 +72,12 @@ export default {
     };
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          this.loaded = true;
-        }
-      });
+    getVisibleProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        this.loaded = true;
+      }
+    });
   },
 };
 </script>

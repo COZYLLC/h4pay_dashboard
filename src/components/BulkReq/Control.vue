@@ -7,16 +7,17 @@
       <b-button class="is-success" style="margin-left: 10px" @click="payment">
         승인
       </b-button>
+      <!--      <b-button class="is-danger" style="margin-left: 10px" @click="remove">
+        거부
+      </b-button> -->
     </div>
-    <b-button class="is-danger" style="margin-left: 10px" @click="remove">
-      거부
-    </b-button>
   </div>
 </template>
 
 <script>
 import { loadTossPayments } from "@tosspayments/sdk";
 import orderIdgen from "@/js/orderidgen";
+import notification from "@/js/notification";
 
 export default {
   props: ["type", "checkedRows"],
@@ -42,10 +43,11 @@ export default {
     async payment() {
       const request = this.checkedRows[0];
       if (this.type != "voucher" && this.type != "gift") {
-        this.$toast.open({
-          message: "대량선물 승인에 실패했습니다.",
-          type: "is-danger",
-        });
+        notification
+          .show(this, "대량선물 승인에 실패했습니다.", "is-danger", 2500)
+          .then((_) => {
+            this.$router.go(0);
+          });
         return;
       }
       const orderId =

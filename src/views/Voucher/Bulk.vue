@@ -9,7 +9,9 @@
 </template>
 
 <script>
+import notification from "@/js/notification";
 import BulkForm from "@/views/Voucher/BulkForm.vue";
+import { issueVoucherRequest } from "@/networking/voucher";
 export default {
   components: {
     BulkForm,
@@ -25,38 +27,44 @@ export default {
         };
         formData.append("issuer", JSON.stringify(issuer));
 
-        this.$axios
-          .post(`${process.env.VUE_APP_API_URL}/voucher/request`, formData)
+        issueVoucherRequest(formData)
           .then((res) => {
             console.log(res);
-            if (res.status == 200) {
-              this.$buefy.notification.open({
-                message: "상품권 발행 및 선물 요청이 정상 처리되었습니다.",
-                type: "is-success",
-                duration: 1000,
-              });
-              this.$router.push("/voucher/log/publish");
-            } else if (res.status == 500) {
-              this.$buefy.notification.open({
-                message:
-                  "요청에 실패했습니다. 서버 내부 오류입니다. 관리자에게 문의해주세요.",
-                type: "is-danger",
-                duration: 1000,
-              });
+            if (res.status) {
+              notification
+                .show(
+                  this,
+                  "상품권 발행 및 선물 요청이 정상 처리되었습니다.",
+                  "is-success",
+                  2500
+                )
+                .then((_) => {
+                  this.$router.push("/voucher/log/publish");
+                });
             } else {
-              this.$buefy.notification.open({
-                message: "요청에 실패했습니다.",
-                type: "is-danger",
-                duration: 1000,
-              });
+              notification
+                .show(
+                  this,
+                  "상품권 발행 및 선물 요청에 실패했습니다. 다시 시도해주세요.",
+                  "is-danger",
+                  2500
+                )
+                .then((_) => {
+                  this.$router.push("/voucher/bulk");
+                });
             }
           })
           .catch((err) => {
-            this.$buefy.notification.open({
-              message: `오류가 발생했습니다: ${err.message}`,
-              type: "is-danger",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                `오류가 발생했습니다: ${err.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.push("/voucher/bulk");
+              });
           });
       });
     },

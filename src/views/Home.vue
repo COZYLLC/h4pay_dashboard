@@ -14,7 +14,9 @@
           </article>
           <article class="tile is-child notification is-primary">
             <p class="title">오늘 주문량</p>
-            <p class="subtitle is-2">{{ today.orders }}</p>
+            <p class="subtitle is-2">
+              {{ today.orders }}
+            </p>
           </article>
         </div>
         <div class="tile is-parent is-vertical is-6">
@@ -29,7 +31,9 @@
           </article>
           <article class="tile is-child notification is-primary">
             <p class="title">가장 많이 팔린 상품</p>
-            <p class="subtitle">{{ weekly.manySoldProduct }}</p>
+            <p class="subtitle">
+              {{ weekly.manySoldProduct }}
+            </p>
           </article>
         </div>
       </div>
@@ -39,34 +43,59 @@
 
 <script>
 import Chart from "../components/Chart.vue";
+import { getProducts } from "../networking/product";
+import { getOrders } from "../networking/order";
 export default {
   components: { Chart },
+  data() {
+    return {
+      loaded: false,
+      products: [],
+      today: {
+        orders: 0,
+      },
+      weekly: {
+        labels: ["", "", "", "", "", "", ""],
+        ordersData: [
+          {
+            label: "주간 주문량",
+            backgroundColor: "#f87979",
+            data: [0, 0, 0, 0, 0, 0, 0],
+          },
+        ],
+        priceData: [
+          {
+            label: "주간 판매금액",
+            backgroundColor: "#30c8ff",
+            data: [0, 0, 0, 0, 0, 0, 0],
+          },
+        ],
+        manySoldProduct: "",
+      },
+    };
+  },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          let start = new Date();
-          const end = new Date();
-          console.log(end);
-          start.setDate(start.getDate() - 6);
-          this.$axios
-            .post(`${process.env.VUE_APP_API_URL}/orders/filter`, {
-              type: "date",
-              start: start,
-              end: end,
-            })
-            .then((res) => {
-              if (res.data.status) {
-                const orders = res.data.result;
-                this.setTableData(orders, start);
-                this.today.orders = this.getTodayOrders(orders, end);
-                this.getManySoldProduct(orders);
-              }
-            });
-        }
-      });
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        let start = new Date();
+        const end = new Date();
+        console.log(end);
+        start.setDate(start.getDate() - 6);
+        getOrders({
+          type: "date",
+          start: start,
+          end: end,
+        }).then((res) => {
+          if (res.status) {
+            const orders = res.result;
+            this.setTableData(orders, start);
+            this.today.orders = this.getTodayOrders(orders, end);
+            this.getManySoldProduct(orders);
+          }
+        });
+      }
+    });
   },
   methods: {
     setTableData(orders, start) {
@@ -97,15 +126,10 @@ export default {
     getManySoldProduct(orders) {
       let qty = [];
       orders.forEach((order) => {
-        this.jsonToList(order.item).forEach((item) => {
-          if (item.qty > 0) {
-            if (qty[item.id] != null) {
-              qty[item.id] += item.qty;
-            } else {
-              qty[item.id] = item.qty;
-            }
-          }
-        });
+        const item = order.item;
+        for (var key in item) {
+          qty[key] = item[key];
+        }
       });
       let max = [0, 0];
       qty.forEach((item, idx) => {
@@ -116,40 +140,6 @@ export default {
       });
       this.weekly.manySoldProduct = this.products[max[0]].productName;
     },
-    jsonToList(json) {
-      let resultArray = [];
-      for (let i = 0; i < json.length; i++) {
-        resultArray.push(json);
-      }
-      return resultArray;
-    },
-  },
-  data() {
-    return {
-      loaded: false,
-      products: [],
-      today: {
-        orders: 0,
-      },
-      weekly: {
-        labels: ["", "", "", "", "", "", ""],
-        ordersData: [
-          {
-            label: "주간 주문량",
-            backgroundColor: "#f87979",
-            data: [0, 0, 0, 0, 0, 0, 0],
-          },
-        ],
-        priceData: [
-          {
-            label: "주간 판매금액",
-            backgroundColor: "#30c8ff",
-            data: [0, 0, 0, 0, 0, 0, 0],
-          },
-        ],
-        manySoldProduct: "",
-      },
-    };
   },
 };
 </script>

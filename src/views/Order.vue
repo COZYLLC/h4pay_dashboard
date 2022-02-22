@@ -52,6 +52,8 @@ import Table from "@/components/Table";
 import TableLoading from "../components/TableLoading.vue";
 import PurchaseDetail from "@/components/Purchase/Detail.vue";
 import PurchaseControl from "@/components/Purchase/Control.vue";
+import { getProducts } from "../networking/product";
+import { getOrders } from "../networking/order";
 export default {
   components: {
     Table,
@@ -115,16 +117,14 @@ export default {
     },
   },
   created() {
-    this.$axios
-      .get(`${process.env.VUE_APP_API_URL}/product`)
-      .then((productRes) => {
-        if (productRes.data.status) {
-          this.products = productRes.data.list;
-          if (this.$route.query.orderId != null) {
-            this.findOrder();
-          }
+    getProducts().then((productRes) => {
+      if (productRes.status) {
+        this.products = productRes.result;
+        if (this.$route.query.orderId != null) {
+          this.findOrder();
         }
-      });
+      }
+    });
   },
   methods: {
     setCheckedRows(value) {
@@ -134,56 +134,29 @@ export default {
       this.page = value;
     },
     findOrder() {
-      let data = {};
-
       if (this.selectedStart != null && this.selectedEnd != null) {
         this.selectedEnd = dateUtil.addTime(this.selectedEnd, 23, 59, 59);
-
-        // 날짜 범위 있음
-        if (this.id == "") {
-          // id가 비어 있으면
-          data = {
-            type: "date",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
-          };
-        } else {
-          // 아니면
-          data = {
-            type: "all",
-            start: this.selectedStart.toISOString(),
-            end: this.selectedEnd.toISOString(),
-            uid: this.id,
-          };
-        }
-      } else if (this.selectedStart == null && this.selectedEnd == null) {
-        // 날짜 범위 없음
-        if (this.id == "") {
-          data = {
-            type: "null",
-          };
-        } else {
-          data = {
-            type: "uid",
-            uid: this.id,
-          };
-        }
       }
-      console.log(data);
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/orders/filter`, data)
-        .then((orderRes) => {
-          console.log(orderRes);
-          if (orderRes.data.status) {
-            this.data = orderRes.data.result.reverse();
-            this.loaded = true;
-            this.$buefy.notification.open({
-              message: "조회에 성공했습니다!",
-              type: "is-primary",
-              duration: 1000,
-            });
-          }
-        });
+      getOrders({
+        dateFrom:
+          this.selectedStart != null
+            ? this.selectedStart.toISOString()
+            : undefined,
+        dateTo:
+          this.selectedEnd != null ? this.selectedEnd.toISOString() : undefined,
+        uid: this.id,
+      }).then((orderRes) => {
+        console.log(orderRes);
+        if (orderRes.status) {
+          this.data = orderRes.result.reverse();
+          this.loaded = true;
+          this.$buefy.notification.open({
+            message: "조회에 성공했습니다!",
+            type: "is-primary",
+            duration: 1000,
+          });
+        }
+      });
     },
   },
 };

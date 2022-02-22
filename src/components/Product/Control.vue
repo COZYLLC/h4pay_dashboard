@@ -3,30 +3,35 @@
     <span v-if="checkedRows.length != 0">
       <b-button
         v-if="!checkedRows[0].soldout"
-        @click="toggleSoldout(checkedRows[0])"
         class="is-danger"
         style="margin-right: 7px"
-        >품절 처리</b-button
+        @click="toggleSoldout(checkedRows[0])"
       >
+        품절 처리
+      </b-button>
       <b-button
         v-else-if="checkedRows[0].soldout"
-        @click="toggleSoldout(checkedRows[0])"
         class="is-primary"
         style="margin-right: 7px"
-        >재고보유 처리</b-button
+        @click="toggleSoldout(checkedRows[0])"
       >
+        재고보유 처리
+      </b-button>
 
-      <!--       <b-button class="is-danger" style="margin-right: 7px">제거</b-button>
- -->
+      <b-button class="is-danger" style="margin-right: 7px" @click="remove">
+        제거
+      </b-button>
+
       <b-button
         class="is-info"
         style="margin-right: 7px"
         @click="showModal('modify')"
-        >제품 정보 변경</b-button
       >
+        제품 정보 변경
+      </b-button>
     </span>
 
-    <b-button class="is-primary" @click="showModal('add')">추가</b-button>
+    <b-button class="is-primary" @click="showModal('add')"> 추가 </b-button>
     <b-modal
       v-if="modalActive"
       v-model="modalActive"
@@ -41,10 +46,10 @@
         <EditModal
           style="text-align: left"
           v-bind="formProps"
-          @close="props.close"
           :title="title"
           :type="type"
-          :productToModify="product"
+          :product-to-modify="product"
+          @close="props.close"
         />
       </template>
     </b-modal>
@@ -53,6 +58,8 @@
 
 <script>
 import EditModal from "@/components/Product/EditModal";
+import { modifyProduct, removeProduct } from "../../networking/product";
+import notification from "@/js/notification";
 export default {
   components: {
     EditModal,
@@ -71,6 +78,43 @@ export default {
     };
   },
   methods: {
+    remove() {
+      removeProduct({
+        target: this.checkedRows[0].id,
+      })
+        .then((res) => {
+          if (res.status == 200 && res.status) {
+            notification
+              .show(
+                this,
+                "제품 삭제가 정상적으로 처리되었습니다.",
+                "is-success",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
+          } else {
+            notification
+              .show(
+                this,
+                `제품 삭제에 실패했습니다: ${res.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
+          }
+        })
+        .catch((err) => {
+          notification
+            .show(this, `제품 삭제에 실패했습니다: ${err}`, "is-danger", 2500)
+            .then((_) => {
+              this.$router.go(0);
+            });
+        });
+    },
     showModal(type) {
       console.log(type);
       this.title = type == "add" ? "제품 추가" : "제품 정보 변경";
@@ -82,31 +126,56 @@ export default {
     },
 
     toggleSoldout(product) {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/product/modify`, {
-          target: product.id,
-          productName: product.productName,
-          price: product.price,
-          desc: product.desc != null ? product.desc : "",
-          img: product.img,
-          soldout: !product.soldout,
-        })
+      const formData = new FormData();
+      formData.append("target", product.id);
+      formData.append("productName", product.productName);
+      formData.append("barcode", product.barcode);
+      formData.append("price", product.price);
+      formData.append("desc", product.desc != null ? product.desc : "");
+      formData.append("img", product.img);
+      formData.append("soldout", !product.soldout);
+      modifyProduct(formData)
         .then((res) => {
           console.log(res);
-          if (res.data.status) {
-            this.$router.go("");
-            this.$buefy.notification.open({
-              message: "제품 정보 변경이 정상처리 되었습니다.",
-              type: "is-primary",
-              duration: 1000,
-            });
+          if (res.status) {
+            notification
+              .show(
+                this,
+                `${
+                  !product.soldout ? "품절처리" : "구매가능"
+                } 처리가 정상처리 되었습니다.`,
+                "is-success",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           } else {
-            this.$buefy.notification.open({
-              message: "제품 정보 변경에 실패했습니다.",
-              type: "is-danger",
-              duration: 1000,
-            });
+            notification
+              .show(
+                this,
+                `${
+                  !product.soldout ? "품절처리" : "구매가능"
+                } 처리에 실패했습니다: ${res.message}`,
+                "is-danger",
+                2500
+              )
+              .then((_) => {
+                this.$router.go(0);
+              });
           }
+        })
+        .catch((err) => {
+          notification
+            .show(
+              this,
+              `제품 정보 변경에 실패했습니다: ${err}`,
+              "is-danger",
+              2500
+            )
+            .then((_) => {
+              this.$router.go(0);
+            });
         });
     },
   },

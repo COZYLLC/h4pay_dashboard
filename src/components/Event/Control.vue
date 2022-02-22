@@ -1,6 +1,19 @@
 <template>
   <div class="has-text-right">
-    <b-button class="is-primary" @click="modalActive = true">추가</b-button>
+    <b-button
+      v-if="checkedRows.length == 1"
+      class="is-primary"
+      @click="showModal('modify')"
+    >
+      편집
+    </b-button>
+    <b-button
+      class="is-primary"
+      style="margin-left: 5px"
+      @click="showModal('add')"
+    >
+      추가
+    </b-button>
     <b-modal
       v-if="modalActive"
       v-model="modalActive"
@@ -15,10 +28,10 @@
         <EditModal
           style="text-align: left"
           v-bind="formProps"
-          @close="props.close"
           :title="title"
           :type="type"
-          :productToModify="product"
+          :event-to-modify="event"
+          @close="props.close"
         />
       </template>
     </b-modal>
@@ -28,35 +41,27 @@
 <script>
 import EditModal from "./EditModal.vue";
 export default {
-  props: ["checkedRows"],
   components: {
     EditModal,
   },
+  props: ["checkedRows"],
   data() {
     return {
       modalActive: false,
       formProps: {},
       title: "",
       type: "",
-      product: "",
+      event: "",
     };
   },
   methods: {
     showModal(type) {
-      console.log(type);
-      this.title = type == "add" ? "제품 추가" : "제품 정보 변경";
+      this.title = type == "add" ? "이벤트 추가" : "이벤트 정보 변경";
       this.type = type;
-      this.modalActive = true;
       if (type == "modify") {
-        this.product = this.checkedRows[0];
+        this.event = this.checkedRows[0];
       }
-    },
-    addEvent() {
-      this.$axios
-        .post(`${process.env.VUE_APP_API_URL}/event/`, this.eventToAdd)
-        .then((res) => {
-          console.log(res);
-        });
+      this.modalActive = true;
     },
   },
 };

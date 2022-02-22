@@ -37,41 +37,12 @@
         <b-field label="총 수량">
           <b-input v-model="event.totalqty" />
         </b-field>
-        <b-field label="사진 업로드">
-          <b-upload
-            v-if="selectedFile == null && !loaded"
-            v-model="selectedFile"
-            drag-drop
-            accept="image/jpeg, image/png, image/gif"
-            @input="setImage"
-          >
-            <section class="section">
-              <div class="content has-text-centered">
-                <p>
-                  <b-icon icon="upload" size="is-large"> </b-icon>
-                </p>
-                <p>파일을 선택하거나 드래그하세요</p>
-              </div>
-            </section>
-          </b-upload>
-        </b-field>
-        <div class="content">
-          <section class="cropper-area">
-            <div class="img-cropper">
-              <vue-cropper
-                v-show="selectedFile != null || loaded"
-                ref="cropper"
-                :aspect-ratio="2.4"
-                :src="imgSrc"
-              />
-            </div>
-            <div v-if="imgSrc != null" id="cancel">
-              <b-button class="is-danger" @click="deleteImage">
-                사진 제거
-              </b-button>
-            </div>
-          </section>
-        </div>
+        <upload-cropper
+          ref="upload-cropper"
+          :init-img="event.img"
+          :name="event.name"
+          @onImageCropped="sendRequest"
+        ></upload-cropper>
       </section>
       <footer class="modal-card-foot">
         <b-button label="닫기" @click="$emit('close')" />
@@ -86,16 +57,9 @@
 </template>
 
 <script>
-import Inko from "inko";
-let inko = new Inko();
-import VueCropper from "vue-cropperjs";
-import "cropperjs/dist/cropper.css";
 import { addEvent, modifyEvent } from "../../networking/event";
 import notification from "@/js/notification";
 export default {
-  components: {
-    VueCropper,
-  },
   props: ["email", "password", "canCancel", "title", "type", "eventToModify"],
   data() {
     return {
@@ -137,22 +101,14 @@ export default {
       this.event = this.eventToModify;
     }
   },
-  mounted() {
-    if (this.type == "modify") this.setImageFromUri(this.eventToModify.img);
-  },
   methods: {
-    deleteImage() {
-      this.selectedFile = null;
-      this.currentImage = null;
-      this.$refs.cropper.destroy();
-    },
     processResult(res) {
       console.log(res);
       if (res.status) {
         notification
           .show(this, "이벤트 처리에 성공했습니다.", "is-success", 2500)
           .then((_) => {
-            this.$router.push("/event");
+            this.$router.go(0);
           });
       } else {
         notification
@@ -163,20 +119,12 @@ export default {
             2500
           )
           .then((_) => {
-            this.$router.push("/event");
+            this.$router.go(0);
           });
       }
     },
     submit() {
-      if (this.selectedFile != null || this.type == "modify")
-        this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
-          const file = new File(
-            [blob],
-            inko.ko2en(this.event.name) + `.${blob.type.split("/")[1]}`
-          );
-          this.sendRequest(file);
-        });
-      else this.sendRequest(null);
+      this.$refs["upload-cropper"].getImageFile();
     },
     sendRequest(file) {
       const formData = new FormData();
@@ -196,33 +144,6 @@ export default {
           this.processResult(res);
         });
       }
-    },
-    setImage() {
-      const file = this.selectedFile;
-      console.log(file);
-      if (file.type.indexOf("image/") === -1) {
-        alert("Please select an image file");
-        return;
-      }
-      if (typeof FileReader === "function") {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          this.imgSrc = event.target.result;
-          // rebuild cropperjs with the updated source
-          console.log(this.$refs.cropper);
-          this.$refs.cropper.replace(event.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert("Sorry, FileReader API not supported");
-      }
-    },
-    setImageFromUri(uri) {
-      this.loaded = true;
-      this.imgSrc = uri;
-      // rebuild cropperjs with the updated source
-      console.log(this.$refs.cropper);
-      this.$refs.cropper.replace(uri);
     },
   },
 };

@@ -83,7 +83,7 @@ export default {
     submit() {
       this.$axios
         .post(`${process.env.VUE_APP_API_URL}/users/login`, {
-          tel: this.tel.replace(/-/gi, ""),
+          tel: this.tel.replace(/-/g, ""),
           password: createHash("sha256").update(this.pw).digest("base64"),
         })
         .then((res) => {

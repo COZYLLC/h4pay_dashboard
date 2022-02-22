@@ -1,9 +1,14 @@
 <template>
-  <div>
+  <div class="has-text-right">
     <b-field label="이름" :type="isValid(nameState)" horizontal>
       <b-input v-model="admin.name" type="text" />
     </b-field>
-    <b-field label="비밀번호" class="has-text-left" :type="isValid(pwState)">
+    <b-field
+      horizontal
+      label="비밀번호"
+      class="has-text-left"
+      :type="isValid(pwState)"
+    >
       <b-input
         v-model="admin.password"
         type="password"
@@ -11,6 +16,7 @@
       ></b-input>
     </b-field>
     <b-field
+      horizontal
       label="비밀번호 확인"
       class="has-text-left"
       :type="isValid(pw2State)"
@@ -32,15 +38,18 @@
         @keyup.native="getPhoneMask"
       />
     </b-field>
-    <b-checkbox
-      v-for="(agreement, idx) in agreements"
-      :key="idx"
-      v-model="admin.checks.selected[idx]"
-      :state="checkState"
-      @input="onCheck(idx)"
-    >
-      {{ agreement.text }}
-    </b-checkbox>
+    <div v-for="(agreement, idx) in agreements" :key="idx">
+      <b-checkbox
+        v-model="admin.checks.selected[idx]"
+        :state="checkState"
+        @input="onCheck(idx)"
+      >
+        {{ agreement.text }}
+      </b-checkbox>
+    </div>
+
+    <b-button rounded class="is-primary" @click="submit"> 제출 </b-button>
+
     <b-modal v-model="policyModalActive">
       <div class="card">
         <div class="card-content">
@@ -59,9 +68,7 @@
         </div>
 
         <footer class="card-footer">
-          <a href="#" class="card-footer-item" @click="closeModal"
-            >동의합니다</a
-          >
+          <a href="#" class="card-footer-item" @click="agree">동의합니다</a>
         </footer>
       </div>
     </b-modal>
@@ -95,13 +102,7 @@ export default {
   },
   computed: {
     checkState() {
-      let state = true;
-      for (let i = 0; i < this.admin.checks.selected.length; i++) {
-        if (!this.admin.checks.selected[i]) {
-          state = false;
-        }
-      }
-      return state;
+      return this.admin.checks.allSelected;
     },
     telState() {
       const telRegExp = /^\d{3}-\d{4}-\d{4}$/;
@@ -132,12 +133,11 @@ export default {
     },
   },
   watch: {
-    selected(newValue) {
-      // Handle changes in individual flavour checkboxes
+    "admin.checks.selected"(newValue) {
       if (newValue.length === 0) {
         this.admin.checks.indeterminate = false;
         this.admin.checks.allSelected = false;
-      } else if (newValue.length === this.checkString.length) {
+      } else if (newValue.length === this.agreements.length) {
         this.admin.checks.indeterminate = false;
         this.admin.checks.allSelected = true;
       } else {
@@ -180,9 +180,20 @@ export default {
       console.log(getMask(this.admin.tel));
       this.admin.tel = getMask(this.admin.tel);
     },
-    closeModal() {
-      this.policyModalActive = false;
+    agree() {
+      if (this.tabIndex == this.agreements.length - 1) {
+        this.policyModalActive = false;
+      } else {
+        this.tabIndex++;
+        this.admin.checks.selected[this.tabIndex] = true;
+      }
     },
   },
 };
 </script>
+
+<style scoped>
+.card {
+  border-radius: 38px !important;
+}
+</style>

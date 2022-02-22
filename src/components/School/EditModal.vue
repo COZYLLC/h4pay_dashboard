@@ -95,6 +95,7 @@ export default {
       return false;
     },
     processResult(res) {
+      this.school.seller.tel = this.school.seller.tel.replace(/-/g, "");
       if (res.status) {
         console.log(res);
         this.copyString(

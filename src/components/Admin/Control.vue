@@ -20,7 +20,7 @@ export default {
             notification
               .show(this, "가입 승인이 완료되었습니다!", "is-success", 2500)
               .then((_) => {
-                this.$router.push("/admin");
+                this.$router.go(0);
               });
           }
         })
@@ -40,7 +40,7 @@ export default {
             notification
               .show(this, "가입 거절이 완료되었습니다.", "is-success", 2500)
               .then((_) => {
-                this.$router.push("/admin");
+                this.$router.go(0);
               });
           }
         })

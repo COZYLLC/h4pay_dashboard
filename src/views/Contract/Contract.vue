@@ -45,7 +45,11 @@
         label="교환앱 로그인 비밀번호 설정"
         class="has-text-right"
       >
-        <b-field label="비밀번호" class="has-text-left">
+        <b-field
+          label="비밀번호"
+          class="has-text-left"
+          :type="passwordValidity ? 'is-success' : 'is-danger'"
+        >
           <b-input v-model="password" type="password" password-reveal></b-input>
         </b-field>
         <b-button
@@ -80,6 +84,9 @@
 import { createHash } from "crypto";
 import Register from "@/views/Contract/Register.vue";
 import notification from "@/js/notification";
+import { uploadStudentInfos } from "@/networking/contract";
+import { changeSchoolPassword } from "../../networking/school";
+import { register } from "../../networking/users";
 
 export default {
   components: {
@@ -117,44 +124,66 @@ export default {
     getExcelLink() {
       return `${window.location.origin}/studentExcelTemplate.xlsx`;
     },
-    submit(admin) {
+    async submit(admin) {
       const encrpytedPassword = createHash("sha256")
         .update(this.password)
         .digest("base64");
       const formData = new FormData();
       formData.append("file", this.file);
       formData.append("token", this.token);
-      formData.append("password", encrpytedPassword);
-      formData.append("adminName", admin.name);
-      formData.append("adminTel", admin.tel);
-      formData.append("adminPassword", admin.password);
-      formData.append("adminEmail", admin.email);
-      submitAxiosInstance(formData)
-        .then((res) => {
-          console.log(res);
-          if (res.status) {
+      const uploadStudentInfoResult = await uploadStudentInfos(formData);
+      if (uploadStudentInfoResult.status) {
+        const changePasswordResult = await changeSchoolPassword({
+          token: this.token,
+          password: encrpytedPassword,
+        });
+        if (changePasswordResult.status) {
+          const registerResult = await register({
+            name: admin.name,
+            password: admin.password,
+            email: admin.email,
+            gID: "",
+            aID: "",
+            tel: admin.tel.replace(/-/g, ""),
+            role: "AT",
+          });
+          if (registerResult.status) {
             notification
-              .show(this, "정보 입력에 성공했습니다! ", "is-success", 2500)
+              .show(
+                this,
+                "H4Pay를 이용해주셔서 감사합니다!",
+                "is-success",
+                2500
+              )
               .then((_) => {
-                this.$router.push("/login");
+                this.$router.push("/");
               });
           } else {
-            throw { response: { message: res.message } };
+            notification
+              .show(this, "관리자 계정 생성에 실패했습니다.", "is-danger", 2500)
+              .then((_) => {
+                this.$router.push(`/contract/${this.token}`);
+              });
           }
-        })
-        .catch((err) => {
-          console.log(err);
+        } else {
           notification
             .show(
               this,
-              `정보 입력에 실패했습니다: ${err.response.message}`,
+              "매점 교환앱 비밀번호 설정에 실패했습니다.",
               "is-danger",
               2500
             )
             .then((_) => {
-              this.$router.push("/login");
+              this.$router.push(`/contract/${this.token}`);
             });
-        });
+        }
+      } else {
+        notification
+          .show(this, "학생 정보 입력에 실패했습니다.", "is-danger", 2500)
+          .then((_) => {
+            this.$router.push(`/contract/${this.token}`);
+          });
+      }
     },
     goNextStep() {
       this.activeStep++;

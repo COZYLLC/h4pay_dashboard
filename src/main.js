@@ -43,8 +43,10 @@ import {
   faSchool,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
+import UploadCropper from "@/components/UploadCropper";
+
+Vue.component("upload-cropper", UploadCropper);
 
 library.add(
   faSignOutAlt,
@@ -91,8 +93,6 @@ Vue.use(buefy, {
 
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axios;
-
-Vue.component(VueCropper);
 
 new Vue({
   router,

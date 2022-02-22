@@ -5,6 +5,7 @@ function showNoti(vue, message, type, duration) {
       type,
       duration,
       progressBar: true,
+      position: "is-bottom-right",
     });
     setTimeout(resolve, duration);
   });

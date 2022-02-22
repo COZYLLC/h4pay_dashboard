@@ -14,11 +14,8 @@ function deleteSchool(schoolId) {
   return getService().post(`${baseUrl}/${schoolId}/delete`);
 }
 
-function changeSchoolPassword(token, newPassword) {
-  return getService().post(`${baseUrl}/changepass`, {
-    token: token,
-    password: createHash("sha256").update(newPassword).digest("base64"),
-  });
+function changeSchoolPassword(data) {
+  return getService().post(`${baseUrl}/changepass`, data);
 }
 
 function validatePassToken(token) {

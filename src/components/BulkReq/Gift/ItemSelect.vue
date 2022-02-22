@@ -108,7 +108,8 @@ export default {
     },
     submit() {
       var amount = 0;
-      this.targets.forEach((target) => {
+      this.targets.forEach((target, idx) => {
+        this.targets[idx].tel = this.targets[idx].tel.replace(/-/g, "");
         for (var key in target.item) {
           const qty = target.item[key];
           const matchProduct = this.products.filter(

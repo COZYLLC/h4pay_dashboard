@@ -7,6 +7,7 @@
           :src="require('@/assets/logo.png')"
           alt="Lightweight UI components for Vue.js based on Bulma"
         />
+        {{ schoolName }}
       </div>
       <b-menu class="is-custom-mobile">
         <b-menu-list label="메인">
@@ -59,6 +60,7 @@
 
 <script>
 import menu from "../menu.json";
+import { getSchools } from "../networking/school";
 export default {
   data() {
     return {
@@ -71,6 +73,7 @@ export default {
         uid: null,
         name: null,
       },
+      schoolName: "",
       menu,
     };
   },
@@ -92,6 +95,13 @@ export default {
       } else {
         this.user.name = this.$store.getters.getName;
         this.user.role = this.$store.getters.getRole;
+        getSchools({
+          schoolId: this.$store.getters.getSchoolId,
+        }).then((res) => {
+          if (res.status && res.result.length > 0) {
+            this.schoolName = res.result[0].name;
+          }
+        });
       }
     });
   },

@@ -305,7 +305,7 @@ export default {
       const data = {
         schoolId: this.form.schoolId,
         name: this.form.name,
-        uid: this.form.uid,
+        uid: this.form.email.split("@")[0],
         password: createHash("sha256")
           .update(this.form.password)
           .digest("base64"),
@@ -318,6 +318,7 @@ export default {
       };
       register(data)
         .then((res) => {
+          console.log(res);
           if (res.status == true) {
             alert(
               "가입 요청이 처리되었습니다. 매점 담당 선생님께 승인을 요청하세요."
@@ -337,27 +338,26 @@ export default {
       console.log(
         `${this.telState} ${this.emailState} ${this.pwState} ${this.pw2State} ${this.idState} ${this.sIdState} ${this.roleState} ${this.nameState}`
       );
-      if (
-        this.telState &&
-        this.emailState &&
-        this.pwState &&
-        this.pw2State &&
-        this.idState &&
-        this.roleState &&
-        this.nameState
-      ) {
+      const notValid = " 입력되지 않았거나 올바르지 않습니다.";
+      if (!this.telState) {
+        alert("전화번호가" + notValid);
+      } else if (!this.emailState) {
+        alert("이메일이" + notValid);
+      } else if (!this.pwState) {
+        alert("비밀번호가", notValid);
+      } else if (!this.pw2State) {
+        alert("비밀번호 확인이 입력되지 않았거나 일치하지 않습니다.");
+      } else if (!this.roleState) {
+        alert("사용자 유형을 선택해주세요.");
+      } else if (!this.nameState) {
+        alert("이름이" + notValid);
+      } else {
         if (this.checkState) {
-          if (this.codeState) {
-            this.form.studentid == null;
-            this.sendRequest();
-          } else {
-            alert("올바른 선생님 인증 코드를 입력해주세요!");
-          }
+          this.form.studentid == null;
+          this.sendRequest();
         } else {
           alert("약관에 모두 동의해주세요!");
         }
-      } else {
-        alert("필요한 값을 모두 입력해주세요.");
       }
     },
   },

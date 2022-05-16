@@ -91,8 +91,8 @@
 
 <script>
 import { createHash } from "crypto";
-import { register } from "../networking/users";
-import { getSchools } from "../networking/school";
+import { register } from "../../networking/users";
+import { getSchools } from "../../networking/school";
 
 export default {
   data() {

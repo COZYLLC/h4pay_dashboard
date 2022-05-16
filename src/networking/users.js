@@ -5,6 +5,10 @@ function register(data) {
   return getService().post(`${baseUrl}/register`, data);
 }
 
+function findPassword(data) {
+  return getService().post();
+}
+
 // Admin
 function getUnverifiedUsers() {
   return getService().get(`${baseUrl}/reqlist`);

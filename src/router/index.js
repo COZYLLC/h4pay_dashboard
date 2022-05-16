@@ -8,8 +8,11 @@ import BulkReq from "@/views/Bulk/BulkReq";
 import BulkWithoutApprove from "@/views/Bulk/BulkWithoutApprove";
 import Event from "@/views/Event";
 import Product from "@/views/Product";
-import Login from "@/views/Login";
-import Register from "@/views/Register";
+// Account
+import Login from "@/views/Account/Login";
+import Register from "@/views/Account/Register";
+import ChangePassword from "@/views/Account/ChangePassword";
+
 import Success from "@/views/Success";
 import Admin from "@/views/Admin";
 import School from "@/views/School";
@@ -95,6 +98,14 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    meta: {
+      hideNavigation: true,
+    },
+  },
+  {
+    path: "/change/pass",
+    name: "ChangePassword",
+    component: ChangePassword,
     meta: {
       hideNavigation: true,
     },

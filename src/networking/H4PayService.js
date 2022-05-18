@@ -20,6 +20,7 @@ function getService() {
   );
   axiosInstance.interceptors.response.use(
     (response) => {
+      console.log(response);
       return {
         status: response.data.status,
         result: response.data.result,
@@ -29,7 +30,7 @@ function getService() {
     (error) => {
       return {
         status: false,
-        message: error.toString(),
+        message: error.response.data.message ?? error.toString(),
       };
     }
   );

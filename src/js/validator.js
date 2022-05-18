@@ -27,7 +27,7 @@ let pwValidator = (value) => {
 };
 
 let pwCheckValidator = (value1, value2) => {
-  return value1 == value2;
+  return value1 == value2 && value1 != "" && value1 != null;
 };
 
 export {

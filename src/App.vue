@@ -3,7 +3,7 @@
     <section class="sidebar-layout">
       <Navbar v-if="!$route.meta.hideNavigation" />
 
-      <div class="p-1" id="routerView">
+      <div id="routerView" class="p-1">
         <transition name="fade"> <router-view /> </transition>
       </div>
     </section>
@@ -40,10 +40,9 @@ export default {
 
 #routerView {
   width: 100%;
-  padding: 20px !important;
+  padding: 0 !important;
 }
 </style>
-
 
 <script>
 import Navbar from "@/components/Navbar";

@@ -26,16 +26,21 @@
                   @keyup.native.enter="submit"
                 ></b-input>
               </b-field>
-              <b-button
-                class="is-primary"
-                style="margin-right: 10px"
-                @click="submit"
-              >
-                로그인
-              </b-button>
-              <b-button class="is-primary" @click="$router.push('register')">
-                회원가입
-              </b-button>
+              <router-link to="/change/pass"
+                >비밀번호를 잊어버리셨나요?
+              </router-link>
+              <div>
+                <b-button
+                  class="is-primary"
+                  style="margin-right: 10px"
+                  @click="submit"
+                >
+                  로그인
+                </b-button>
+                <b-button class="is-primary" @click="$router.push('register')">
+                  회원가입
+                </b-button>
+              </div>
             </div>
           </div>
         </div>

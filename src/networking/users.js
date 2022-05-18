@@ -6,7 +6,11 @@ function register(data) {
 }
 
 function findPassword(data) {
-  return getService().post();
+  return getService().post(`${baseUrl}/findauth`, data);
+}
+
+function changePassword(data) {
+  return getService().post(`${baseUrl}/find/password`, data);
 }
 
 // Admin
@@ -30,4 +34,11 @@ function rejectUser(users) {
   return getService().post(`${baseUrl}/approve`, { id: ids, approve: false });
 }
 
-export { register, getUnverifiedUsers, approveUser, rejectUser };
+export {
+  register,
+  getUnverifiedUsers,
+  approveUser,
+  rejectUser,
+  findPassword,
+  changePassword,
+};
